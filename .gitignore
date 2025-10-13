@@ -360,3 +360,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ASP.NET Core default setup: bower directory is configured as wwwroot/lib/ and bower restore is true
