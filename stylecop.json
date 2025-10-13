@@ -10,6 +10,9 @@
       "systemUsingDirectivesFirst": true,
       "usingDirectivesPlacement": "outsideNamespace",
       "blankLinesBetweenUsingGroups": "omit"
+    },
+    "layoutRules": {
+      "allowUsingDirectivesOutsideNamespace": true
     }
   }
 }
