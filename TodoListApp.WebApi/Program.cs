@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TodoListApp.WebApi.Data;
+using TodoListApp.WebApi.Services;
 
 namespace TodoListApp.WebApi;
 internal static class Program
@@ -9,6 +10,7 @@ internal static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        _ = builder.Services.AddControllers();
         _ = builder.Services.AddAuthorization();
         _ = builder.Services.AddEndpointsApiExplorer();
         _ = builder.Services.AddSwaggerGen();
@@ -17,6 +19,7 @@ internal static class Program
             options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
         _ = builder.Services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<TodoListDbContext>();
+        _ = builder.Services.AddScoped<ITodoListDatabaseService, TodoListDatabaseService>();
 
         var app = builder.Build();
 
@@ -28,6 +31,8 @@ internal static class Program
 
         _ = app.UseHttpsRedirection();
         _ = app.UseAuthorization();
+
+        _ = app.MapControllers();
 
         app.Run();
     }
