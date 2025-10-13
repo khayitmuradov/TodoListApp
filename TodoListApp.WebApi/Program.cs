@@ -20,6 +20,7 @@ internal static class Program
         _ = builder.Services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<TodoListDbContext>();
         _ = builder.Services.AddScoped<ITodoListDatabaseService, TodoListDatabaseService>();
+        _ = builder.Services.AddScoped<ITaskDatabaseService, TaskDatabaseService>();
 
         var app = builder.Build();
 

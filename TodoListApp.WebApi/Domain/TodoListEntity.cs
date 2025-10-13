@@ -13,4 +13,6 @@ internal class TodoListEntity
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedUtc { get; set; }
+
+    public ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
 }
