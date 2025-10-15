@@ -37,7 +37,7 @@ internal class TaskDatabaseService : ITaskDatabaseService
         var t = await this.dbContext.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == taskId)
             ?? throw new KeyNotFoundException();
 
-        _ = await this.GetOwnedListAsync(t.TodoListId, requesterId); // ownership
+        _ = await this.GetOwnedListAsync(t.TodoListId, requesterId);
         return ToModel(t);
     }
 
@@ -94,6 +94,77 @@ internal class TaskDatabaseService : ITaskDatabaseService
         }
 
         _ = await this.dbContext.SaveChangesAsync();
+    }
+
+    public async Task<(IReadOnlyList<TaskModel> Items, int Total)> GetAssignedToMeAsync(
+        string userId,
+        string? statusFilter,
+        string sortBy,
+        string order,
+        int page,
+        int pageSize)
+    {
+        var q = this.dbContext.Tasks.AsNoTracking()
+            .Where(t => t.AssigneeId == userId);
+
+        if (string.IsNullOrWhiteSpace(statusFilter))
+        {
+            q = q.Where(t => t.Status == Constraints.TaskStatus.InProgress);
+        }
+        else if (Enum.TryParse<Constraints.TaskStatus>(statusFilter, true, out var parsed))
+        {
+            q = q.Where(t => t.Status == parsed);
+        }
+
+        var by = (sortBy ?? "dueDate").ToLowerInvariant();
+        var ord = (order ?? "asc").ToLowerInvariant();
+
+        IOrderedQueryable<TaskEntity> ordered = by switch
+        {
+            "name" => ord == "desc"
+                ? q.OrderByDescending(t => t.Title)
+                : q.OrderBy(t => t.Title),
+
+            _ =>
+                ord == "desc"
+                ? q.OrderByDescending(t => t.DueDate ?? DateTime.MaxValue).ThenByDescending(t => t.Title)
+                : q.OrderBy(t => t.DueDate ?? DateTime.MaxValue).ThenBy(t => t.Title),
+        };
+
+        var total = await ordered.CountAsync();
+
+        var items = await ordered
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items.Select(ToModel).ToList(), total);
+    }
+
+    public async Task ChangeStatusAsync(int taskId, string requesterId, Constraints.TaskStatus newStatus)
+    {
+        var e = await this.dbContext.Tasks.FirstOrDefaultAsync(t => t.Id == taskId)
+            ?? throw new KeyNotFoundException();
+
+        if (e.AssigneeId != requesterId)
+        {
+            var list = await this.dbContext.TodoLists.AsNoTracking().FirstOrDefaultAsync(l => l.Id == e.TodoListId);
+
+            if (list == null)
+            {
+                throw new KeyNotFoundException();
+            }
+
+            if (list.OwnerId != requesterId)
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+
+        e.Status = newStatus;
+        _ = await this.dbContext.SaveChangesAsync();
+
+        this.logger.LogInformation("Task {TaskId} status changed to {Status} by {User}", taskId, newStatus, requesterId);
     }
 
     private static bool IsOverdue(TaskEntity t) =>

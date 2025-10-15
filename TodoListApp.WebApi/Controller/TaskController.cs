@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using TodoListApp.WebApi.Exceptions;
 using TodoListApp.WebApi.Models;
 using TodoListApp.WebApi.Services;
 
@@ -137,6 +138,76 @@ public partial class TaskController : ControllerBase
         catch (UnauthorizedAccessException)
         {
             return this.Forbid();
+        }
+    }
+
+    /// <summary>
+    /// Get tasks assigned to the current user with filter/sort/paging.
+    /// </summary>
+    /// <param name="status">NotStarted | InProgress | Completed (default when omitted: InProgress).</param>
+    /// <param name="sortBy">name | dueDate (default: dueDate).</param>
+    /// <param name="order">asc | desc (default: asc).</param>
+    /// <param name="page">page number (default: 1).</param>
+    /// <param name="pageSize">page size (uses config default/cap when 0).</param>
+    [HttpGet("tasks/assigned-to-me")]
+    public async Task<ActionResult<IEnumerable<TaskModel>>> GetAssignedToMeAsync(
+        [FromQuery] string? status = "InProgress",
+        [FromQuery] string? sortBy = "dueDate",
+        [FromQuery] string? order = "asc",
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 0)
+    {
+        var (p, s) = this.ResolvePaging(page, pageSize);
+
+        if (!string.IsNullOrWhiteSpace(status) &&
+        !Enum.TryParse<Constraints.TaskStatus>(status, true, out _))
+        {
+            return this.BadRequest($"Invalid status '{status}'. Allowed: NotStarted, InProgress, Completed.");
+        }
+
+        try
+        {
+            var (items, total) = await this.service.GetAssignedToMeAsync(
+                this.CurrentUserId(),
+                status,
+                sortBy ?? "dueDate",
+                order ?? "asc",
+                p,
+                s);
+
+            this.Response.Headers["X-Total-Count"] = total.ToString(CultureInfo.InvariantCulture);
+            return this.Ok(items);
+        }
+        catch (AppException ex)
+        {
+            this.logger.LogError(ex, "Failed to get tasks assigned to current user");
+            return this.StatusCode(500, "Internal Server Error");
+        }
+    }
+
+    /// <summary>
+    /// Change the status of a task. Allowed for assignee or list owner.
+    /// </summary>
+    [HttpPatch("tasks/{id:int}/status")]
+    public async Task<IActionResult> ChangeStatusAsync(int id, [FromBody] ChangeTaskStatusModel model)
+    {
+        if (!this.ModelState.IsValid)
+        {
+            return this.BadRequest(this.ModelState);
+        }
+
+        try
+        {
+            await this.service.ChangeStatusAsync(id, this.CurrentUserId(), model.Status);
+            return this.NoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return this.Forbid();
+        }
+        catch (KeyNotFoundException)
+        {
+            return this.NotFound();
         }
     }
 

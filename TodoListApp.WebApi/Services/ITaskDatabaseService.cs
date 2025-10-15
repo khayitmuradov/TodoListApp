@@ -13,4 +13,14 @@ public interface ITaskDatabaseService
     Task UpdateAsync(int taskId, string requesterId, UpdateTaskModel model);
 
     Task DeleteAsync(int taskId, string requesterId);
+
+    Task<(IReadOnlyList<TaskModel> Items, int Total)> GetAssignedToMeAsync(
+        string userId,
+        string? statusFilter,
+        string sortBy,
+        string order,
+        int page,
+        int pageSize);
+
+    Task ChangeStatusAsync(int taskId, string requesterId, Constraints.TaskStatus newStatus);
 }
