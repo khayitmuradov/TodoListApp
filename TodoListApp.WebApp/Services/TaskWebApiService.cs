@@ -83,4 +83,39 @@ internal class TaskWebApiService : ITaskWebApiService
         var resp = await this.httpClient.PatchAsync(uri, content, ct);
         _ = resp.EnsureSuccessStatusCode();
     }
+
+    public async Task<(IReadOnlyList<TaskItem> Items, int Total)> GetAssignedAsync(
+    string? status, string sortBy, string order, int page, int pageSize, CancellationToken ct = default)
+    {
+        var query = new List<string>();
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            query.Add($"status={Uri.EscapeDataString(status)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(sortBy))
+        {
+            query.Add($"sortBy={Uri.EscapeDataString(sortBy)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(order))
+        {
+            query.Add($"order={Uri.EscapeDataString(order)}");
+        }
+
+        query.Add($"page={page}");
+        query.Add($"pageSize={pageSize}");
+
+        var url = new Uri(this.httpClient.BaseAddress!, $"api/tasks/assigned-to-me?{string.Join("&", query)}");
+        var resp = await this.httpClient.GetAsync(url, ct);
+        _ = resp.EnsureSuccessStatusCode();
+
+        var body = await resp.Content.ReadAsStringAsync(ct);
+        var items = JsonSerializer.Deserialize<List<TaskItem>>(body, this.jsonOptions) ?? new List<TaskItem>();
+
+        var totalHeader = resp.Headers.TryGetValues("X-Total-Count", out var vals) ? vals.FirstOrDefault() : null;
+        _ = int.TryParse(totalHeader, out var total);
+
+        return (items, total);
+    }
 }

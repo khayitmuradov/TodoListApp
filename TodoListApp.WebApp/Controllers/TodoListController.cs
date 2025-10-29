@@ -22,7 +22,11 @@ public class TodoListController : Controller
         string? selectedTitle = null,
         string? selectedDescription = null,
         int taskPage = 1,
-        int taskPageSize = 5)
+        int taskPageSize = 5,
+        string aStatus = "InProgress",
+        string aOrder = "asc",
+        int aPage = 1,
+        int aPageSize = 5)
     {
         var (items, total) = await this.lists.GetAsync(page, pageSize);
         this.ViewData["Total"] = total;
@@ -41,6 +45,14 @@ public class TodoListController : Controller
             this.ViewData["TaskPage"] = taskPage;
             this.ViewData["TaskPageSize"] = taskPageSize;
         }
+
+        var (aItems, aTotal) = await this.tasks.GetAssignedAsync(aStatus, "dueDate", aOrder, aPage, aPageSize);
+        this.ViewData["AItems"] = aItems;
+        this.ViewData["ATotal"] = aTotal;
+        this.ViewData["AStatus"] = aStatus;
+        this.ViewData["AOrder"] = aOrder;
+        this.ViewData["APage"] = aPage;
+        this.ViewData["APageSize"] = aPageSize;
 
         return this.View(items);
     }
