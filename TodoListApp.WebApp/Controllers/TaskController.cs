@@ -118,4 +118,40 @@ public class TaskController : Controller
         this.TempData["Message"] = "Status updated.";
         return this.RedirectToAction("Index", "TodoList", new { selectedId = listId });
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeStatusAssigned(
+    int id,
+    TaskStatus status,
+    string aStatus = "InProgress",
+    string aOrder = "asc",
+    int aPage = 1,
+    int aPageSize = 5,
+    int? selectedId = null,
+    string? selectedTitle = null,
+    string? selectedDescription = null,
+    int page = 1,
+    int pageSize = 10,
+    int taskPage = 1,
+    int taskPageSize = 5)
+    {
+        await this.tasks.PatchStatusAsync(id, status);
+        this.TempData["Message"] = "Status updated.";
+
+        return this.RedirectToAction("Index", "TodoList", new
+        {
+            page,
+            pageSize,
+            selectedId,
+            selectedTitle,
+            selectedDescription,
+            taskPage,
+            taskPageSize,
+            aStatus,
+            aOrder,
+            aPage,
+            aPageSize,
+        });
+    }
 }
