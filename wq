@@ -1,0 +1,14 @@
+* [33me63e304[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;32mbackup-before-force-push[m[33m)[m WIP
+* [33me9903a9[m[33m ([m[1;32mbackup/before-rebase-2025-10-29[m[33m)[m feat(ep03-assigned): add “Assigned to me” sidebar (filters, sort by due date, inline status)
+* [33m0122ca3[m feat(ep03-assigned): add “Assigned to me” sidebar (filters, sort by due date, inline status)
+* [33m02e4901[m T04 Completed feat: Add TaskController, TaskModels, TaskWebServices and implemented all methods, Add Layout, ValidationScriptsPartial, TodoList Create, Delete, Edit, Index Razor pages implemented
+[31m|[m * [33mfd8379b[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat(ep03-assigned): add “Assigned to me” sidebar (filters, sort by due date, inline status)
+[31m|[m[31m/[m  
+* [33m1210cb0[m feat: implement EP03 Assigned Tasks backend (US11–US14)
+* [33m9e07d87[m T05 Completed feat: Add TaskStatus feat: Add TaskController and implement US05. US06. US07, US08, US09, US10 feat: Add TaskEntity and TaskModels feat: Add ITaskDatabaseService and implement it to TaskDatabaseService feat: Apply DI container for TaskEntity update: Apply Migrations for Task entity
+* [33meea7df5[m T03 Done feat: Add TodoListEntity feat: Add DbSet of TodoLists feat: Start implementing Service contract + internal data model: Add ITodoListDatabaseService interface feat: Add Data class TodoList feat: Implement service: TodoListDatabaseService and register it in DI (Program.cs) feat: Add DTOs (TodoListModels)
+* [33m282d205[m T02 Completed: feat: Register DI Container for Db Context in Program.cs in WebApi feat: Create TodoListDbContext.cs in WebApi feat: Create and apply first migration
+* [33me243a34[m T01. -Add and configure C# Projects -Add analyzers to all .csproj files -Install required packages -Modify appsettings.json for basic logging, Jwt tokens, Paging, Api URLs and ConnectionStrings -Cleanup created unnecessary files in all projects
+* [33m34a72d4[m Update diagrams.
+* [33m53a8bb0[m Add description for NuGet packages.
+* [33m48d9129[m Add solution configuration files: editor configs, stylecop settings, style ruleset, readme. Add projects with unit tests.
