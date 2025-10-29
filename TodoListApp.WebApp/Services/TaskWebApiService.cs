@@ -83,6 +83,7 @@ internal class TaskWebApiService : ITaskWebApiService
         var resp = await this.httpClient.PatchAsync(uri, content, ct);
         _ = resp.EnsureSuccessStatusCode();
     }
+<<<<<<< HEAD
 
     public async Task<(IReadOnlyList<TaskItem> Items, int Total)> GetAssignedAsync(
     string? status, string sortBy, string order, int page, int pageSize, CancellationToken ct = default)
@@ -118,4 +119,6 @@ internal class TaskWebApiService : ITaskWebApiService
 
         return (items, total);
     }
+=======
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
 }

@@ -8,12 +8,16 @@
     var page      = (int)(ViewData["Page"] ?? 1);
     var pageSize  = (int)(ViewData["PageSize"] ?? 10);
     var pages     = Math.Max(1, (int)Math.Ceiling((double)total / Math.Max(1, pageSize)));
+<<<<<<< HEAD
     bool hasPrev  = page > 1;
     bool hasNext  = page < pages;
+=======
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
 
     var selId     = ViewData["SelectedId"] as int?;
     var selTitle  = ViewData["SelectedTitle"] as string ?? "";
     var selDesc   = ViewData["SelectedDescription"] as string ?? "";
+<<<<<<< HEAD
 
     var taskItems    = ViewData["TaskItems"] as IReadOnlyList<TaskItem> ?? Array.Empty<TaskItem>();
     var taskTotal    = (int)(ViewData["TaskTotal"] ?? 0);
@@ -34,6 +38,20 @@
     var aPages    = Math.Max(1, (int)Math.Ceiling((double)aTotal / Math.Max(1, aPageSize)));
     var aHasPrev  = aPage > 1;
     var aHasNext  = aPage < aPages;
+=======
+    var hasSelection = selId.HasValue;
+
+    var taskItems = ViewData["TaskItems"] as IReadOnlyList<TaskItem> ?? Array.Empty<TaskItem>();
+    var taskTotal = (int)(ViewData["TaskTotal"] ?? 0);
+    var taskPage  = (int)(ViewData["TaskPage"] ?? 1);
+    var taskPageSize = (int)(ViewData["TaskPageSize"] ?? 5);
+    var taskPages = Math.Max(1, (int)Math.Ceiling((double)taskTotal / Math.Max(1, taskPageSize)));
+
+    bool hasPrevLists = page > 1;
+    bool hasNextLists = page < pages;
+    bool hasPrevTasks = taskPage > 1;
+    bool hasNextTasks = taskPage < taskPages;
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
 }
 
 @section Sidebar {
@@ -58,12 +76,17 @@
                        asp-route-selectedTitle="@item.Title"
                        asp-route-selectedDescription="@item.Description"
                        asp-route-taskPage="1"
+<<<<<<< HEAD
                        asp-route-taskPageSize="5"
                        asp-route-aStatus="@(ViewData["AStatus"] ?? "InProgress")"
                        asp-route-aOrder="@(ViewData["AOrder"] ?? "asc")"
                        asp-route-aPage="@(ViewData["APage"] ?? 1)"
                        asp-route-aPageSize="@(ViewData["APageSize"] ?? 5)">
                        <span class="title">@item.Title</span>
+=======
+                       asp-route-taskPageSize="5">
+                        <span class="title">@item.Title</span>
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
                     </a>
 
                     <div class="dropdown more-wrap ms-1">
@@ -99,14 +122,23 @@
     </div>
 
     <div class="row-sep"></div>
+<<<<<<< HEAD
     <nav class="pager d-flex justify-content-between">
         <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrev ? "" : "disabled")"
            asp-action="Index"
            asp-route-page="@(page - 1)"
+=======
+
+    <nav class="pager d-flex justify-content-between">
+        <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrevLists ? "" : "disabled")"
+           asp-action="Index"
+           asp-route-page="@(page-1)"
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
            asp-route-pageSize="@pageSize"
            asp-route-selectedId="@selId"
            asp-route-selectedTitle="@selTitle"
            asp-route-selectedDescription="@selDesc"
+<<<<<<< HEAD
            asp-route-aStatus="@(ViewData["AStatus"] ?? "InProgress")"
            asp-route-aOrder="@(ViewData["AOrder"] ?? "asc")"
            asp-route-aPage="@(ViewData["APage"] ?? 1)"
@@ -201,11 +233,22 @@
         <a class="btn btn-outline-secondary btn-sm square-btn @(aHasPrev ? "" : "disabled")"
            asp-action="Index"
            asp-route-page="@(page)"
+=======
+           asp-route-taskPage="@taskPage"
+           asp-route-taskPageSize="@taskPageSize">Prev</a>
+
+        <span class="align-self-center small">Page @(page) / @pages</span>
+
+        <a class="btn btn-outline-secondary btn-sm square-btn @(hasNextLists ? "" : "disabled")"
+           asp-action="Index"
+           asp-route-page="@(page+1)"
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
            asp-route-pageSize="@pageSize"
            asp-route-selectedId="@selId"
            asp-route-selectedTitle="@selTitle"
            asp-route-selectedDescription="@selDesc"
            asp-route-taskPage="@taskPage"
+<<<<<<< HEAD
            asp-route-taskPageSize="@taskPageSize"
            asp-route-aStatus="@aStatus"
            asp-route-aOrder="@aOrder"
@@ -227,11 +270,23 @@
            asp-route-aOrder="@aOrder"
            asp-route-aPage="@(aPage+1)"
            asp-route-aPageSize="@aPageSize">Next</a>
+=======
+           asp-route-taskPageSize="@taskPageSize">Next</a>
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
     </nav>
 }
 
 @if (hasSelection)
 {
+<<<<<<< HEAD
+=======
+    <div class="mt-3 mb-3">
+        <a class="add-list-btn" asp-controller="Task" asp-action="Create" asp-route-listId="@selId">
+            <span class="plus">+</span>
+            <span>Add Task</span>
+        </a>
+    </div>
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
     <div class="page-title">
         <h1>@selTitle</h1>
     </div>
@@ -240,6 +295,7 @@
         <div class="desc">@selDesc</div>
     }
 
+<<<<<<< HEAD
     <div class="mt-3 mb-3">
         <a class="add-list-btn" asp-controller="Task" asp-action="Create" asp-route-listId="@selId"
            asp-route-aStatus="@(ViewData["AStatus"] ?? "InProgress")"
@@ -357,6 +413,114 @@
                asp-route-aPageSize="@aPageSize">Next</a>
         </nav>
     }
+=======
+    <div class="mt-4">
+        @if (!taskItems.Any())
+        {
+            <div class="text-muted">No tasks in this list.</div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var t in taskItems)
+                {
+                    var overdue = ((t.IsOverdue ?? (t.DueDate.HasValue && t.DueDate.Value < DateTime.UtcNow))
+                    && t.Status != TodoListApp.WebApp.Models.TaskStatus.Completed);
+
+                    var rowClass = overdue ? "task-overdue" : "";
+
+                    string statusClass = t.Status switch
+                    {
+                        TodoListApp.WebApp.Models.TaskStatus.NotStarted => "notstarted",
+                        TodoListApp.WebApp.Models.TaskStatus.InProgress => "inprogress",
+                        TodoListApp.WebApp.Models.TaskStatus.Completed => "completed",
+                        _ => ""
+                    };
+
+                    <div class="list-group-item d-flex justify-content-between align-items-center @rowClass">
+                        <a class="text-decoration-none flex-grow-1 d-flex justify-content-between align-items-center"
+                           asp-controller="Task" asp-action="Details" asp-route-id="@t.Id">
+                            <div class="text-truncate">
+                                <div class="fw-semibold text-dark">@t.Title</div>
+                                @if (!string.IsNullOrWhiteSpace(t.Description))
+                                {
+                                    <div class="small text-muted text-truncate" style="max-width: 60ch;">@t.Description</div>
+                                }
+                                @if (overdue)
+                                {
+                                    <div class="small fw-semibold" style="color:#b91c1c;">Overdue</div>
+                                }
+                            </div>
+
+                            <div class="text-end ms-3">
+                                @if (t.DueDate.HasValue)
+                                {
+                                    <div class="small">@t.DueDate.Value.ToString("yyyy-MM-dd")</div>
+                                }
+                                @if (t.Status.HasValue)
+                                {
+                                    <span class="badge badge-status @statusClass">@t.Status.Value</span>
+                                }
+                            </div>
+                        </a>
+
+                        <div class="dropdown ms-2">
+                            <button class="btn btn-light btn-sm ellipsis-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="More">
+                                &#8942;
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Task" asp-action="Edit"
+                                       asp-route-id="@t.Id"
+                                       asp-route-listId="@t.TodoListId">Edit</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Task" asp-action="ChangeStatus"
+                                       asp-route-id="@t.Id"
+                                       asp-route-listId="@t.TodoListId">Change Status</a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a class="dropdown-item text-danger"
+                                       asp-controller="Task" asp-action="Delete"
+                                       asp-route-id="@t.Id"
+                                       asp-route-listId="@t.TodoListId">Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <nav class="pager d-flex justify-content-between mt-3">
+                <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrevTasks ? "" : "disabled")"
+                   asp-action="Index"
+                   asp-route-page="@(page)"
+                   asp-route-pageSize="@pageSize"
+                   asp-route-selectedId="@selId"
+                   asp-route-selectedTitle="@selTitle"
+                   asp-route-selectedDescription="@selDesc"
+                   asp-route-taskPage="@(taskPage-1)"
+                   asp-route-taskPageSize="@taskPageSize">Prev</a>
+
+                <span class="align-self-center small">Tasks Page @taskPage / @taskPages</span>
+
+                <a class="btn btn-outline-secondary btn-sm square-btn @(hasNextTasks ? "" : "disabled")"
+                   asp-action="Index"
+                   asp-route-page="@(page)"
+                   asp-route-pageSize="@pageSize"
+                   asp-route-selectedId="@selId"
+                   asp-route-selectedTitle="@selTitle"
+                   asp-route-selectedDescription="@selDesc"
+                   asp-route-taskPage="@(taskPage+1)"
+                   asp-route-taskPageSize="@taskPageSize">Next</a>
+            </nav>
+        }
+    </div>
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
 }
 else
 {

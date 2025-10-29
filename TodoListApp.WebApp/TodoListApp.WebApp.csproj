@@ -29,4 +29,11 @@
     </PackageReference>
   </ItemGroup>
 
+<<<<<<< HEAD
+=======
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
+  </ItemGroup>
+
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
 </Project>

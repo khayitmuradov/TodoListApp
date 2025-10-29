@@ -16,7 +16,10 @@ public interface ITaskWebApiService
     Task DeleteAsync(int id, CancellationToken ct = default);
 
     Task PatchStatusAsync(int id, TaskStatus status, CancellationToken ct = default);
+<<<<<<< HEAD
 
     Task<(IReadOnlyList<TaskItem> Items, int Total)> GetAssignedAsync(
     string? status, string sortBy, string order, int page, int pageSize, CancellationToken ct = default);
+=======
+>>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
 }
