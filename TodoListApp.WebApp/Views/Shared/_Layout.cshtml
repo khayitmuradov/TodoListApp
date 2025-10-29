@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Todo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        :root {
+            --panel: #fff;
+            --soft: #f6f7f9;
+            --line: #eceff3;
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--soft);
+        }
+
+        body, .btn, .form-control, .dropdown-menu {
+            font-family: "Lexend Deca", system-ui, -apple-system, Segoe UI, Roboto, Arial, "Segoe UI Emoji";
+        }
+
+        .app {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            max-width: 1440px;
+            margin: 24px auto;
+            border-radius: 20px;
+            box-shadow: 0 2px 18px rgba(0,0,0,.05);
+            background: #fff;
+        }
+
+        .side {
+            flex: 0 0 300px;
+            width: 300px;
+            background: #F4F4F4;
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            border-right: 1px solid #eceff3;
+            padding: 20px;
+        }
+
+            .side h6 {
+                letter-spacing: .3px;
+                color: #6b7280;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .side .list-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .side .list-item {
+                flex: 1 1 auto;
+                min-width: 0;
+                padding: 10px 12px;
+                border-radius: 10px;
+                text-decoration: none;
+                color: inherit;
+            }
+
+                .side .list-item .title {
+                    display: block;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .side .list-item.active, .side .list-item:hover {
+                    background: #f2f4f7;
+                }
+
+            .side .more-wrap {
+                flex: 0 0 auto;
+            }
+
+        .content {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 28px 32px;
+        }
+
+        .page-title h1 {
+            font-weight: 700;
+            font-size: 32px;
+            margin: 0;
+            line-height: 1.1;
+            word-break: break-word;
+        }
+
+        .page-title h1 {
+            font-weight: 700;
+            font-size: 32px;
+            margin: 0;
+        }
+
+        .desc {
+            color: #6b7280;
+            margin-top: 6px;
+            word-break: break-word;
+        }
+
+        .row-sep {
+            border-top: 1px solid var(--line);
+            margin: 16px 0;
+        }
+
+        .ellipsis-btn {
+            border-radius: 8px;
+        }
+
+        .square-btn {
+            border-radius: 8px;
+        }
+
+        .pager a, .pager span {
+            margin: 0 4px;
+        }
+
+        .add-list-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px dashed #d8dde4;
+            background: #fff;
+            border-radius: 10px;
+            color: #111;
+            text-decoration: none;
+        }
+
+            .add-list-btn:hover {
+                background: #f2f4f7;
+            }
+
+            .add-list-btn .plus {
+                width: 22px;
+                height: 22px;
+                border-radius: 6px;
+                border: 1px solid #d8dde4;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                line-height: 1;
+            }
+
+        .badge-status {
+            border: 1px solid transparent;
+        }
+
+            .badge-status.notstarted {
+                background: #fee2e2;
+                color: #991b1b;
+                border-color: #fecaca;
+            }
+
+            .badge-status.inprogress {
+                background: #dbeafe;
+                color: #1e40af;
+                border-color: #bfdbfe;
+            }
+
+            .badge-status.completed {
+                background: #dcfce7;
+                color: #166534;
+                border-color: #bbf7d0;
+            }
+
+        .task-overdue {
+            border-left: 4px solid #ef4444;
+            background: #fff5f5;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app d-flex">
+        <aside class="side">
+            @RenderSection("Sidebar", required: false)
+        </aside>
+        <main class="content flex-grow-1">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

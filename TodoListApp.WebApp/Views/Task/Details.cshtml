@@ -1,0 +1,70 @@
+@model TodoListApp.WebApp.Models.TaskDetails
+@{
+    ViewData["Title"] = "Task";
+}
+
+@{
+    string statusClass = Model.Status switch
+    {
+        TodoListApp.WebApp.Models.TaskStatus.NotStarted => "notstarted",
+        TodoListApp.WebApp.Models.TaskStatus.InProgress => "inprogress",
+        TodoListApp.WebApp.Models.TaskStatus.Completed => "completed",
+        _ => ""
+    };
+
+    var overdue = ((Model.IsOverdue ?? (Model.DueDate.HasValue && Model.DueDate.Value < DateTime.UtcNow))
+                  && Model.Status != TodoListApp.WebApp.Models.TaskStatus.Completed);
+}
+<div class="mb-2">
+    <span class="badge badge-status @statusClass">@Model.Status</span>
+    @if (overdue)
+    {
+        <span class="ms-2 small fw-semibold" style="color:#b91c1c;">Overdue</span>
+    }
+</div>
+
+<div class="page-title">
+    <h1>@Model.Title</h1>
+</div>
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <div class="desc mb-3">@Model.Description</div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Task Id</dt>
+            <dd class="col-sm-9">@Model.Id</dd>
+
+            <dt class="col-sm-3">List Id</dt>
+            <dd class="col-sm-9">@Model.TodoListId</dd>
+
+            <dt class="col-sm-3">Created</dt>
+            <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
+
+            <dt class="col-sm-3">Due</dt>
+            <dd class="col-sm-9">@((Model.DueDate.HasValue) ? Model.DueDate.Value.ToString("yyyy-MM-dd HH:mm") : "-")</dd>
+
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@Model.Status</dd>
+
+            <dt class="col-sm-3">Assignee</dt>
+            <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.AssigneeId) ? Model.AssigneeId : "-")</dd>
+
+            @if (Model.IsOverdue.HasValue)
+            {
+                <dt class="col-sm-3">Overdue</dt>
+                <dd class="col-sm-9">@(Model.IsOverdue.Value ? "Yes" : "No")</dd>
+            }
+        </dl>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-controller="TodoList" asp-action="Index"
+       asp-route-selectedId="@Model.TodoListId"
+       asp-route-selectedTitle=""
+       asp-route-selectedDescription=""
+       class="btn btn-outline-secondary square-btn">Back</a>
+</div>

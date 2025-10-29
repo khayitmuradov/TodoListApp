@@ -1,3 +1,5 @@
+using TodoListApp.WebApp.Services;
+
 namespace TodoListApp.WebApp;
 
 internal static class Program
@@ -7,6 +9,9 @@ internal static class Program
         var builder = WebApplication.CreateBuilder(args);
 
         _ = builder.Services.AddControllersWithViews();
+
+        _ = builder.Services.AddHttpClient<ITodoListWebApiService, TodoListWebApiService>();
+        _ = builder.Services.AddHttpClient<ITaskWebApiService, TaskWebApiService>();
 
         var app = builder.Build();
 
@@ -25,7 +30,7 @@ internal static class Program
 
         _ = app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=TodoList}/{action=Index}/{id?}");
 
         app.Run();
     }

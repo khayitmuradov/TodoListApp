@@ -1,0 +1,49 @@
+@model TodoListApp.WebApp.Models.UpdateTaskRequest
+@{
+    ViewData["Title"] = "Edit Task";
+    var idStr = Context.Request.RouteValues["id"]?.ToString();
+    var id = int.TryParse(idStr, out var parsed) ? parsed : 0;
+    var listId = (int)(ViewData["ListId"] ?? 0);
+}
+
+<div class="page-title"><h1>Edit Task</h1></div>
+
+<form asp-action="Edit" method="post" class="mt-3">
+    <input type="hidden" name="id" value="@id" />
+    <input type="hidden" name="listId" value="@listId" />
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">Title</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" rows="3" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DueDate" class="form-label">Due date</label>
+        <input asp-for="DueDate" class="form-control" type="datetime-local" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label">Status</label>
+        <select asp-for="Status" class="form-select"
+                asp-items="Html.GetEnumSelectList<TodoListApp.WebApp.Models.TaskStatus>()"></select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AssigneeId" class="form-label">Assignee (optional)</label>
+        <input asp-for="AssigneeId" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary square-btn">Save</button>
+    <a asp-controller="TodoList" asp-action="Index" asp-route-selectedId="@listId"
+       class="btn btn-outline-secondary square-btn">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

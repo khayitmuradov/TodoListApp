@@ -1,0 +1,18 @@
+@model TodoListApp.WebApp.Models.TaskDetails
+@{
+    ViewData["Title"] = "Delete Task";
+    var listId = (int)ViewData["ListId"]!;
+}
+
+<h3>Delete Task</h3>
+<div class="alert alert-warning">
+    Delete <strong>@Model.Title</strong>?
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input type="hidden" name="listId" value="@listId" />
+    <button type="submit" class="btn btn-danger square-btn">Delete</button>
+    <a asp-controller="TodoList" asp-action="Index" asp-route-selectedId="@listId"
+       class="btn btn-outline-secondary square-btn">Cancel</a>
+</form>
