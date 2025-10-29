@@ -122,14 +122,10 @@
            asp-route-taskPage="@taskPage"
            asp-route-taskPageSize="@taskPageSize">Next</a>
     </nav>
-
-    <!-- Assigned to me -->
     <div class="row-sep"></div>
     <h6>Assigned to me</h6>
 
-    <!-- Filters (Status + Order) -->
     <form method="get" class="d-flex gap-2 mb-2">
-        <!-- keep current list & paging in query -->
         <input type="hidden" name="page" value="@pageCur" />
         <input type="hidden" name="pageSize" value="@pageSizeCur" />
         <input type="hidden" name="selectedId" value="@selId" />
@@ -159,18 +155,15 @@
         <div class="d-flex flex-column">
             @foreach (var t in aItems)
             {
-                <!-- looks like list rows -->
                 <div class="list-row">
                     <a class="flex-grow-1 list-item"
                        asp-controller="Task" asp-action="Details" asp-route-id="@t.Id">
                         <span class="title">@t.Title</span>
                     </a>
 
-                    <!-- inline status dropdown PATCH (immediate) -->
                     <form asp-controller="Task" asp-action="ChangeStatusAssigned" method="post" class="more-wrap ms-1">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@t.Id" />
-                        <!-- preserve both assigned & list states on redirect -->
                         <input type="hidden" name="aStatus" value="@aStatus" />
                         <input type="hidden" name="aOrder" value="@aOrder" />
                         <input type="hidden" name="aPage" value="@aPage" />
@@ -191,7 +184,6 @@
             }
         </div>
     }
-    <!-- Assigned pagination -->
     @{
         var hasPrev = aPage > 1;
         var hasNext = aPage < aPages;
