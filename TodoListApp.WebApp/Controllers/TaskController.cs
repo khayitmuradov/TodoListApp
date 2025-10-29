@@ -118,7 +118,6 @@ public class TaskController : Controller
         this.TempData["Message"] = "Status updated.";
         return this.RedirectToAction("Index", "TodoList", new { selectedId = listId });
     }
-<<<<<<< HEAD
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -155,6 +154,4 @@ public class TaskController : Controller
             aPageSize,
         });
     }
-=======
->>>>>>> fd8379b471fe3521632245d5ea5df5160c1e08d5
 }
