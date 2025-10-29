@@ -211,6 +211,68 @@ public partial class TaskController : ControllerBase
         }
     }
 
+    [HttpGet("tasks/search")]
+    public async Task<ActionResult<IEnumerable<TaskModel>>> Search(
+    string? title,
+    string? createdFrom,
+    string? createdTo,
+    string? dueFrom,
+    string? dueTo,
+    int page = 1,
+    int pageSize = 0)
+    {
+        bool hasTitle = !string.IsNullOrWhiteSpace(title);
+        bool hasCreated = !string.IsNullOrWhiteSpace(createdFrom) || !string.IsNullOrWhiteSpace(createdTo);
+        bool hasDue = !string.IsNullOrWhiteSpace(dueFrom) || !string.IsNullOrWhiteSpace(dueTo);
+
+        int kinds = (hasTitle ? 1 : 0) + (hasCreated ? 1 : 0) + (hasDue ? 1 : 0);
+
+        if (kinds == 0)
+        {
+            return this.BadRequest("Provide exactly one of: title OR createdFrom/createdTo OR dueFrom/dueTo.");
+        }
+
+        if (kinds > 1)
+        {
+            return this.BadRequest("Do not mix criteria. Use only one kind: title OR created dates OR due dates.");
+        }
+
+        static bool TryParseDate(string? s, out DateTime? d)
+        {
+            d = null;
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsed))
+            {
+                d = parsed.Date;
+                return true;
+            }
+            return false;
+        }
+
+        if (!TryParseDate(createdFrom, out var cFrom) ||
+            !TryParseDate(createdTo, out var cTo) ||
+            !TryParseDate(dueFrom, out var dFrom) ||
+            !TryParseDate(dueTo, out var dTo))
+        {
+            return this.BadRequest("Dates must be in YYYY-MM-DD format.");
+        }
+
+        var (p, s) = this.ResolvePaging(page, pageSize);
+
+        var (items, total) = await this.service.SearchAsync(
+            hasTitle ? title : null,
+            cFrom, cTo,
+            dFrom, dTo,
+            p, s);
+
+        this.Response.Headers["X-Total-Count"] = total.ToString(CultureInfo.InvariantCulture);
+        return this.Ok(items);
+    }
+
     private (int Page, int PageSize) ResolvePaging(int page, int pageSize)
     {
         var def = this.configuration.GetValue<int>("Paging:DefaultPageSize");

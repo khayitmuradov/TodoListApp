@@ -23,4 +23,14 @@ public interface ITaskDatabaseService
         int pageSize);
 
     Task ChangeStatusAsync(int taskId, string requesterId, Constraints.TaskStatus newStatus);
+
+    Task<(IReadOnlyList<TaskModel> Items, int Total)> SearchAsync(
+    string? title,
+    DateTime? createdFrom,
+    DateTime? createdTo,
+    DateTime? dueFrom,
+    DateTime? dueTo,
+    int page,
+    int pageSize);
+
 }

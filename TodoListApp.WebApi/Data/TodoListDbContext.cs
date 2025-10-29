@@ -32,5 +32,14 @@ internal class TodoListDbContext : IdentityDbContext<IdentityUser>
             .WithMany(l => l.Tasks)
             .HasForeignKey(t => t.TodoListId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        _ = builder.Entity<TaskEntity>()
+            .HasIndex(t => t.Title);
+
+        _ = builder.Entity<TaskEntity>()
+            .HasIndex(t => t.CreatedDate);
+
+        _ = builder.Entity<TaskEntity>()
+            .HasIndex(t => t.DueDate);
     }
 }
