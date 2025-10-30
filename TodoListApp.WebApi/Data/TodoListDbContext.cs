@@ -16,6 +16,10 @@ internal class TodoListDbContext : IdentityDbContext<IdentityUser>
 
     public DbSet<TaskEntity> Tasks => this.Set<TaskEntity>();
 
+    public DbSet<TagEntity> Tags => this.Set<TagEntity>();
+
+    public DbSet<TaskTagEntity> TaskTags => this.Set<TaskTagEntity>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -41,5 +45,23 @@ internal class TodoListDbContext : IdentityDbContext<IdentityUser>
 
         _ = builder.Entity<TaskEntity>()
             .HasIndex(t => t.DueDate);
+
+        _ = builder.Entity<TagEntity>()
+            .HasIndex(t => t.Name);
+
+        _ = builder.Entity<TaskTagEntity>()
+            .HasKey(tt => new { tt.TaskId, tt.TagId });
+
+        _ = builder.Entity<TaskTagEntity>()
+            .HasOne(tt => tt.Task)
+            .WithMany(t => t.TaskTags)
+            .HasForeignKey(tt => tt.TaskId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        _ = builder.Entity<TaskTagEntity>()
+            .HasOne(tt => tt.Tag)
+            .WithMany(t => t.TaskTags)
+            .HasForeignKey(tt => tt.TagId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

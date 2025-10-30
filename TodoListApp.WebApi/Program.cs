@@ -21,6 +21,7 @@ internal static class Program
             .AddEntityFrameworkStores<TodoListDbContext>();
         _ = builder.Services.AddScoped<ITodoListDatabaseService, TodoListDatabaseService>();
         _ = builder.Services.AddScoped<ITaskDatabaseService, TaskDatabaseService>();
+        _ = builder.Services.AddScoped<ITagDatabaseService, TagDatabaseService>();
 
         var app = builder.Build();
 

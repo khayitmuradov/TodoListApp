@@ -169,24 +169,23 @@ internal class TaskDatabaseService : ITaskDatabaseService
 
     public async Task<(IReadOnlyList<TaskModel> Items, int Total)> SearchAsync(
     string? title,
-    DateTime? createdFrom, DateTime? createdTo,
-    DateTime? dueFrom, DateTime? dueTo,
-    int page, int pageSize)
+    DateTime? createdFrom,
+    DateTime? createdTo,
+    DateTime? dueFrom,
+    DateTime? dueTo,
+    int page,
+    int pageSize)
     {
-        // base query: ALL tasks (no owner restriction)
         IQueryable<TaskEntity> q = this.dbContext.Tasks.AsNoTracking();
 
-        // exactly one kind of criterion will be set by controller validation
         if (!string.IsNullOrWhiteSpace(title))
         {
-            // case-insensitive contains; SQL Server is often case-insensitive but Like is explicit
             var pattern = $"%{title.Trim()}%";
             q = q.Where(t => t.Title != null && EF.Functions.Like(t.Title, pattern));
         }
         else if (createdFrom.HasValue || createdTo.HasValue)
         {
             var from = createdFrom?.Date;
-            // toExclusive = (createdTo + 1 day) to make inclusive date-only filtering
             var toExclusive = createdTo.HasValue ? createdTo.Value.Date.AddDays(1) : (DateTime?)null;
 
             if (from.HasValue)
@@ -216,15 +215,12 @@ internal class TaskDatabaseService : ITaskDatabaseService
         }
 
         var total = await q.CountAsync();
-
-        // no sorting requested — apply paging directly
         var skip = (page - 1) * pageSize;
         var items = await q.Skip(skip).Take(pageSize).ToListAsync();
-
         var models = items.Select(ToModel).ToList();
+
         return (models, total);
     }
-
 
     private static bool IsOverdue(TaskEntity t) =>
         t.DueDate.HasValue && t.DueDate.Value.Date < DateTime.UtcNow.Date && t.Status != Constraints.TaskStatus.Completed;

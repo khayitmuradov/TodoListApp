@@ -27,4 +27,6 @@ internal class TaskEntity
 
     [ForeignKey(nameof(TodoListId))]
     public TodoListEntity? TodoList { get; set; }
+
+    public ICollection<TaskTagEntity> TaskTags { get; set; } = new List<TaskTagEntity>();
 }

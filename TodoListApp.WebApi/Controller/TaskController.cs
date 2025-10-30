@@ -250,6 +250,7 @@ public partial class TaskController : ControllerBase
                 d = parsed.Date;
                 return true;
             }
+
             return false;
         }
 
@@ -265,12 +266,80 @@ public partial class TaskController : ControllerBase
 
         var (items, total) = await this.service.SearchAsync(
             hasTitle ? title : null,
-            cFrom, cTo,
-            dFrom, dTo,
-            p, s);
+            cFrom,
+            cTo,
+            dFrom,
+            dTo,
+            p,
+            s);
 
         this.Response.Headers["X-Total-Count"] = total.ToString(CultureInfo.InvariantCulture);
         return this.Ok(items);
+    }
+
+    [HttpGet("tasks/{id:int}/tags")]
+    public async Task<ActionResult<IReadOnlyList<TagModel>>> GetTagsForTask(int id, [FromServices] ITagDatabaseService tags)
+    {
+        ArgumentNullException.ThrowIfNull(tags);
+
+        if (id <= 0)
+        {
+            return this.BadRequest("Invalid task id");
+        }
+
+        try
+        {
+            return this.Ok(await tags.GetTagsForTaskAsync(id));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            this.logger.LogWarning(ex, "Task not found");
+            return this.NotFound();
+        }
+    }
+
+    [HttpPost("tasks/{id:int}/tags/{tagId:int}")]
+    public async Task<IActionResult> AddTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
+    {
+        ArgumentNullException.ThrowIfNull(tags);
+
+        if (id <= 0 || tagId <= 0)
+        {
+            return this.BadRequest("Invalid id.");
+        }
+
+        try
+        {
+            await tags.AddTagToTaskAsync(id, tagId);
+            return this.NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            this.logger.LogWarning(ex, "Task/tag not found");
+            return this.NotFound();
+        }
+    }
+
+    [HttpDelete("tasks/{id:int}/tags/{tagId:int}")]
+    public async Task<IActionResult> RemoveTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
+    {
+        ArgumentNullException.ThrowIfNull(tags);
+
+        if (id <= 0 || tagId <= 0)
+        {
+            return this.BadRequest("Invalid id.");
+        }
+
+        try
+        {
+            await tags.RemoveTagFromTaskAsync(id, tagId);
+            return this.NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            this.logger.LogWarning(ex, "Task/tag/link not found");
+            return this.NotFound();
+        }
     }
 
     private (int Page, int PageSize) ResolvePaging(int page, int pageSize)

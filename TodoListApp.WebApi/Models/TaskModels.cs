@@ -21,6 +21,8 @@ public class TaskModel
     public string AssigneeId { get; set; } = default!;
 
     public bool IsOverdue { get; set; }
+
+    public IReadOnlyList<TagModel> Tags { get; set; } = Array.Empty<TagModel>();
 }
 
 public class CreateTaskModel
