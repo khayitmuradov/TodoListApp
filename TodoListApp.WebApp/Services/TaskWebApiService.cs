@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using TodoListApp.WebApp.Models;
 using TaskStatus = TodoListApp.WebApp.Models.TaskStatus;
 
@@ -112,6 +113,58 @@ internal class TaskWebApiService : ITaskWebApiService
 
         var body = await resp.Content.ReadAsStringAsync(ct);
         var items = JsonSerializer.Deserialize<List<TaskItem>>(body, this.jsonOptions) ?? new List<TaskItem>();
+
+        var totalHeader = resp.Headers.TryGetValues("X-Total-Count", out var vals) ? vals.FirstOrDefault() : null;
+        _ = int.TryParse(totalHeader, out var total);
+
+        return (items, total);
+    }
+
+    public async Task<(IReadOnlyList<TaskItem> Items, int Total)> SearchAsync(
+        TaskSearchQuery query,
+        CancellationToken ct = default)
+    {
+        var qb = HttpUtility.ParseQueryString(string.Empty);
+
+        // exactly one criterion
+        if (!string.IsNullOrWhiteSpace(query.Title))
+        {
+            qb["title"] = query.Title!;
+        }
+        else if (query.CreatedFrom.HasValue || query.CreatedTo.HasValue)
+        {
+            if (query.CreatedFrom.HasValue)
+            {
+                qb["createdFrom"] = query.CreatedFrom.Value.ToString("yyyy-MM-dd");
+            }
+
+            if (query.CreatedTo.HasValue)
+            {
+                qb["createdTo"] = query.CreatedTo.Value.ToString("yyyy-MM-dd");
+            }
+        }
+        else if (query.DueFrom.HasValue || query.DueTo.HasValue)
+        {
+            if (query.DueFrom.HasValue)
+            {
+                qb["dueFrom"] = query.DueFrom.Value.ToString("yyyy-MM-dd");
+            }
+
+            if (query.DueTo.HasValue)
+            {
+                qb["dueTo"] = query.DueTo.Value.ToString("yyyy-MM-dd");
+            }
+        }
+
+        qb["page"] = (query.Page <= 0 ? 1 : query.Page).ToString();
+        qb["pageSize"] = (query.PageSize <= 0 ? 10 : query.PageSize).ToString();
+
+        var uri = new Uri(this.httpClient.BaseAddress!, $"api/tasks/search?{qb}");
+        using var resp = await this.httpClient.GetAsync(uri, ct);
+        _ = resp.EnsureSuccessStatusCode();
+
+        var json = await resp.Content.ReadAsStringAsync(ct);
+        var items = JsonSerializer.Deserialize<List<TaskItem>>(json, this.jsonOptions) ?? new();
 
         var totalHeader = resp.Headers.TryGetValues("X-Total-Count", out var vals) ? vals.FirstOrDefault() : null;
         _ = int.TryParse(totalHeader, out var total);

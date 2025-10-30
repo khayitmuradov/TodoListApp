@@ -1,0 +1,200 @@
+@model TodoListApp.WebApp.Models.TaskSearchResult
+@using TodoListApp.WebApp.Models
+@{
+    ViewData["Title"] = "Search Tasks";
+
+    var q = Model.Query ?? new TaskSearchQuery();
+    int currentPage = Model.Page <= 0 ? 1 : Model.Page;
+    int totalPages = Model.TotalPages;
+    int pageSize = Model.PageSize <= 0 ? 10 : Model.PageSize;
+
+    string qsBase(string extra = "")
+    {
+        var nv = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        if (!string.IsNullOrWhiteSpace(q.Title)) nv["title"] = q.Title;
+        if (q.CreatedFrom.HasValue) nv["createdFrom"] = q.CreatedFrom.Value.ToString("yyyy-MM-dd");
+        if (q.CreatedTo.HasValue) nv["createdTo"] = q.CreatedTo.Value.ToString("yyyy-MM-dd");
+        if (q.DueFrom.HasValue) nv["dueFrom"] = q.DueFrom.Value.ToString("yyyy-MM-dd");
+        if (q.DueTo.HasValue) nv["dueTo"] = q.DueTo.Value.ToString("yyyy-MM-dd");
+        nv["pageSize"] = pageSize.ToString();
+
+        if (!string.IsNullOrEmpty(extra))
+        {
+            var parts = extra.Split('&', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var p in parts)
+            {
+                var kv = p.Split('=', 2);
+                if (kv.Length == 2) nv[kv[0]] = kv[1];
+            }
+        }
+        return nv.ToString() ?? "";
+    }
+}
+
+<div class="container my-4">
+    <h1 class="mb-3">Search Tasks</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" asp-controller="Search" id="searchForm">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12">
+                        <small class="text-muted">Choose exactly one option below.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Title contains</label>
+                        <input type="text" name="Title" class="form-control" value="@(q.Title ?? "")" placeholder="e.g. meeting" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Created From</label>
+                        <input type="date" name="CreatedFrom" class="form-control" value="@(q.CreatedFrom?.ToString("yyyy-MM-dd") ?? "")" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Created To</label>
+                        <input type="date" name="CreatedTo" class="form-control" value="@(q.CreatedTo?.ToString("yyyy-MM-dd") ?? "")" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Due From</label>
+                        <input type="date" name="DueFrom" class="form-control" value="@(q.DueFrom?.ToString("yyyy-MM-dd") ?? "")" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Due To</label>
+                        <input type="date" name="DueTo" class="form-control" value="@(q.DueTo?.ToString("yyyy-MM-dd") ?? "")" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Page Size</label>
+                        <select name="PageSize" class="form-select">
+                            @foreach (var size in new[] { 5, 10, 20, 50 })
+                            {
+                                <option value="@size" selected="@(pageSize == size)">@size</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100">Search</button>
+                    </div>
+                </div>
+            </form>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger mt-3">
+                    @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@err.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <div class="mt-2">
+                <small class="text-muted">
+                    <span class="legend overdue-box"></span> Overdue tasks are highlighted.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-semibold">Results: @Model.Total</div>
+                @if (Model.Total > 0)
+                {
+                    <div>
+                        Page @currentPage of @totalPages
+                    </div>
+                }
+            </div>
+
+            @if (Model.Items.Count == 0)
+            {
+                <div class="text-muted">No tasks to show.</div>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var t in Model.Items)
+                    {
+                        var dueDate = t.DueDate;
+                        var isOverdue = dueDate.HasValue && t.Status != TodoListApp.WebApp.Models.TaskStatus.Completed && dueDate.Value.Date < DateTime.UtcNow.Date;
+
+                        <a asp-controller="Task" asp-action="Details" asp-route-id="@t.Id"
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center task-row @(isOverdue ? "overdue" : "")">
+                            <div class="me-3">
+                                <div class="fw-semibold">@t.Title</div>
+                                <div class="small text-muted">
+                                    List #@t.TodoListId
+                                    @if (t.DueDate.HasValue)
+                                    {
+                                        <span class="mx-1">•</span>
+                                        <span>Due: @t.DueDate.Value.ToString("yyyy-MM-dd")</span>
+                                    }
+                                    @if (isOverdue)
+                                    {
+                                        <span class="badge bg-danger ms-2" aria-label="Overdue">Overdue</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="text-nowrap small">
+                                Status: @t.Status
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+
+            @if (Model.Total > 0)
+            {
+                <nav class="mt-3">
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                            <a class="page-link" href="?@qsBase($"page={currentPage - 1}")" aria-label="Previous">
+                                <span aria-hidden="true">«</span>
+                            </a>
+                        </li>
+
+                        <li class="page-item disabled">
+                            <span class="page-link">Page @currentPage / @totalPages</span>
+                        </li>
+
+                        <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                            <a class="page-link" href="?@qsBase($"page={currentPage + 1}")" aria-label="Next">
+                                <span aria-hidden="true">»</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('searchForm')?.addEventListener('submit', function(e) {
+            const f = e.target;
+            const title = (f.Title?.value || "").trim();
+            const cf = f.CreatedFrom?.value, ct = f.CreatedTo?.value;
+            const df = f.DueFrom?.value, dt = f.DueTo?.value;
+
+            let modes = 0;
+            if (title.length > 0) modes++;
+            if ((cf && cf.length>0) || (ct && ct.length>0)) modes++;
+            if ((df && df.length>0) || (dt && dt.length>0)) modes++;
+
+            if (modes === 0) {
+                return true;
+            }
+            if (modes > 1) {
+                e.preventDefault();
+                alert("Use only one criterion: Title OR Created dates OR Due dates.");
+                return false;
+            }
+        });
+    </script>
+}

@@ -40,7 +40,22 @@
 }
 
 @section Sidebar {
-    <h6>Lists</h6>
+    @{
+        var isSearchActive =
+            string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Search", StringComparison.OrdinalIgnoreCase);
+    }
+
+    <div class="list-row mb-2">
+        <a asp-controller="Search" asp-action="Index"
+           class="flex-grow-1 list-item search-pill @(isSearchActive ? "active" : "")"
+           aria-label="Search tasks">
+            <span class="me-2">🔎</span>
+            <span>SEARCH TASK...</span>
+        </a>
+    </div>
+
+    <hr />
+    <div class="section-title">LISTS</div>
 
     @if (!Model.Any())
     {
@@ -123,7 +138,7 @@
            asp-route-taskPageSize="@taskPageSize">Next</a>
     </nav>
     <div class="row-sep"></div>
-    <h6>Assigned to me</h6>
+    <h6>ASSIGNED TO ME</h6>
 
     <form method="get" class="d-flex gap-2 mb-2">
         <input type="hidden" name="page" value="@pageCur" />
