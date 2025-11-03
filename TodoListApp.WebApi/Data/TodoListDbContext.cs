@@ -20,6 +20,8 @@ internal class TodoListDbContext : IdentityDbContext<IdentityUser>
 
     public DbSet<TaskTagEntity> TaskTags => this.Set<TaskTagEntity>();
 
+    public DbSet<TaskCommentEntity> TaskComments => this.Set<TaskCommentEntity>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -63,5 +65,15 @@ internal class TodoListDbContext : IdentityDbContext<IdentityUser>
             .WithMany(t => t.TaskTags)
             .HasForeignKey(tt => tt.TagId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        _ = builder.Entity<TaskCommentEntity>()
+            .HasOne(c => c.Task)
+            .WithMany()
+            .HasForeignKey(c => c.TaskId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        _ = builder.Entity<TaskCommentEntity>()
+            .Property(c => c.Text)
+            .HasMaxLength(2000);
     }
 }

@@ -22,6 +22,7 @@ internal static class Program
         _ = builder.Services.AddScoped<ITodoListDatabaseService, TodoListDatabaseService>();
         _ = builder.Services.AddScoped<ITaskDatabaseService, TaskDatabaseService>();
         _ = builder.Services.AddScoped<ITagDatabaseService, TagDatabaseService>();
+        _ = builder.Services.AddScoped<ICommentDatabaseService, CommentDatabaseService>();
 
         var app = builder.Build();
 
