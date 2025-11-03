@@ -8,13 +8,43 @@ namespace TodoListApp.WebApp.Controllers;
 public class TaskController : Controller
 {
     private readonly ITaskWebApiService tasks;
+    private readonly ITagWebApiService tags;
 
-    public TaskController(ITaskWebApiService tasks) => this.tasks = tasks;
+    public TaskController(ITaskWebApiService tasks, ITagWebApiService tags)
+    {
+        this.tasks = tasks;
+        this.tags = tags;
+    }
 
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        return this.View(await this.tasks.GetByIdAsync(id));
+        var task = await this.tasks.GetByIdAsync(id);
+
+        var taskTags = await this.tags.GetTagsForTaskAsync(id);
+
+        var allTags = await this.tags.GetAllAsync();
+
+        this.ViewData["TaskTags"] = taskTags;
+        this.ViewData["AllTags"] = allTags;
+
+        return this.View(task);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddTag(int id, int tagId)
+    {
+        await this.tags.AddTagToTaskAsync(id, tagId);
+        return this.RedirectToAction(nameof(this.Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveTag(int id, int tagId)
+    {
+        await this.tags.RemoveTagFromTaskAsync(id, tagId);
+        return this.RedirectToAction(nameof(this.Details), new { id });
     }
 
     [HttpGet]

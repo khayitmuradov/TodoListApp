@@ -8,11 +8,13 @@ public class TodoListController : Controller
 {
     private readonly ITodoListWebApiService lists;
     private readonly ITaskWebApiService tasks;
+    private readonly ITagWebApiService tags;
 
-    public TodoListController(ITodoListWebApiService lists, ITaskWebApiService tasks)
+    public TodoListController(ITodoListWebApiService lists, ITaskWebApiService tasks, ITagWebApiService tags)
     {
         this.lists = lists;
         this.tasks = tasks;
+        this.tags = tags;
     }
 
     public async Task<IActionResult> Index(
@@ -26,7 +28,8 @@ public class TodoListController : Controller
         string aStatus = "InProgress",
         string aOrder = "asc",
         int aPage = 1,
-        int aPageSize = 5)
+        int aPageSize = 5,
+        int? tagId = null)
     {
         var (items, total) = await this.lists.GetAsync(page, pageSize);
         this.ViewData["Total"] = total;
@@ -53,6 +56,16 @@ public class TodoListController : Controller
         this.ViewData["AOrder"] = aOrder;
         this.ViewData["APage"] = aPage;
         this.ViewData["APageSize"] = aPageSize;
+
+        var allTags = await this.tags.GetAllAsync();
+        this.ViewData["Tags"] = allTags;
+        this.ViewData["SelectedTagId"] = tagId;
+
+        if (tagId.HasValue)
+        {
+            var tagTasks = await this.tags.GetTasksByTagAsync(tagId.Value);
+            this.ViewData["TagTasks"] = tagTasks;
+        }
 
         return this.View(items);
     }

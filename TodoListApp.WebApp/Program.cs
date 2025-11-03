@@ -12,6 +12,7 @@ internal static class Program
 
         _ = builder.Services.AddHttpClient<ITodoListWebApiService, TodoListWebApiService>();
         _ = builder.Services.AddHttpClient<ITaskWebApiService, TaskWebApiService>();
+        _ = builder.Services.AddHttpClient<ITagWebApiService, TagWebApiService>();
 
         var app = builder.Build();
 

@@ -61,6 +61,47 @@
     </div>
 </div>
 
+@{
+    var taskTags = ViewData["TaskTags"] as IReadOnlyList<TodoListApp.WebApp.Models.TagItem> ?? Array.Empty<TodoListApp.WebApp.Models.TagItem>();
+    var allTags = ViewData["AllTags"] as IReadOnlyList<TodoListApp.WebApp.Models.TagItem> ?? Array.Empty<TodoListApp.WebApp.Models.TagItem>();
+}
+
+<div class="mt-3">
+    <h5>Tags</h5>
+    <div class="d-flex flex-wrap gap-2">
+        @foreach (var t in taskTags)
+        {
+            <form asp-action="RemoveTag" method="post"
+                  class="d-inline-flex align-items-center gap-2"
+                  style="background:@t.ColorHex; border-radius:999px; padding:4px 10px;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="tagId" value="@t.Id" />
+
+                <span style="font-size:13px;">@t.Name</span>
+
+                <button type="submit"
+                        style="border:none; background:transparent; font-size:12px; line-height:1; cursor:pointer;">
+                    ✕
+                </button>
+            </form>
+
+        }
+    </div>
+
+    <form asp-action="AddTag" method="post" class="mt-2 d-flex gap-2 align-items-center">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <select name="tagId" class="form-select form-select-sm" style="width:180px;">
+            @foreach (var t in allTags)
+            {
+                <option value="@t.Id">@t.Name</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Add tag</button>
+    </form>
+</div>
+
 <div class="mt-3">
     <a asp-controller="TodoList" asp-action="Index"
        asp-route-selectedId="@Model.TodoListId"
