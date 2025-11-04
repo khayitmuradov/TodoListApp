@@ -50,7 +50,7 @@ public class UpdateTaskRequest
 
     public DateTime? DueDate { get; set; }
 
-    public TaskStatus Status { get; set; }
+    public TaskStatus? Status { get; set; }
 
     public string? AssigneeId { get; set; }
 }

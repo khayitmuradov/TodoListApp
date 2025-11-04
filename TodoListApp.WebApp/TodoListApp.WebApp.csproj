@@ -12,9 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Exceptions\**" />
     <Compile Remove="NewFolder1\**" />
+    <Content Remove="Exceptions\**" />
     <Content Remove="NewFolder1\**" />
+    <EmbeddedResource Remove="Exceptions\**" />
     <EmbeddedResource Remove="NewFolder1\**" />
+    <None Remove="Exceptions\**" />
     <None Remove="NewFolder1\**" />
   </ItemGroup>
 
@@ -27,10 +31,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
   </ItemGroup>
 
 </Project>

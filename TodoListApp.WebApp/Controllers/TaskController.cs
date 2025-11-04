@@ -9,24 +9,26 @@ public class TaskController : Controller
 {
     private readonly ITaskWebApiService tasks;
     private readonly ITagWebApiService tags;
+    private readonly ICommentWebApiService comments;
 
-    public TaskController(ITaskWebApiService tasks, ITagWebApiService tags)
+    public TaskController(ITaskWebApiService tasks, ITagWebApiService tags, ICommentWebApiService comments)
     {
         this.tasks = tasks;
         this.tags = tags;
+        this.comments = comments;
     }
 
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
         var task = await this.tasks.GetByIdAsync(id);
-
         var taskTags = await this.tags.GetTagsForTaskAsync(id);
-
         var allTags = await this.tags.GetAllAsync();
+        var taskComments = await this.comments.GetForTaskAsync(id);
 
         this.ViewData["TaskTags"] = taskTags;
         this.ViewData["AllTags"] = allTags;
+        this.ViewData["TaskComments"] = taskComments;
 
         return this.View(task);
     }
@@ -67,6 +69,7 @@ public class TaskController : Controller
 
         if (!this.ModelState.IsValid)
         {
+            this.ViewData["ListId"] = listId;
             return this.View(model);
         }
 
@@ -79,17 +82,20 @@ public class TaskController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id, int listId)
     {
-        var t = await this.tasks.GetByIdAsync(id);
-        this.ViewData["ListId"] = listId;
+        var task = await this.tasks.GetByIdAsync(id);
 
-        return this.View(new UpdateTaskRequest
+        var model = new UpdateTaskRequest
         {
-            Title = t.Title,
-            Description = t.Description,
-            DueDate = t.DueDate,
-            Status = t.Status ?? TaskStatus.NotStarted,
-            AssigneeId = t.AssigneeId,
-        });
+            Title = task.Title,
+            Description = task.Description,
+            DueDate = task.DueDate,
+            Status = task.Status,
+            AssigneeId = task.AssigneeId,
+        };
+
+        this.ViewData["TaskId"] = id;
+        this.ViewData["ListId"] = listId;
+        return this.View(model);
     }
 
     [HttpPost]
@@ -105,6 +111,8 @@ public class TaskController : Controller
 
         if (!this.ModelState.IsValid)
         {
+            this.ViewData["TaskId"] = id;
+            this.ViewData["ListId"] = listId;
             return this.View(model);
         }
 

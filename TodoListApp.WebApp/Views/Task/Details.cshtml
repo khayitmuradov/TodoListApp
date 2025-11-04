@@ -14,98 +14,170 @@
 
     var overdue = ((Model.IsOverdue ?? (Model.DueDate.HasValue && Model.DueDate.Value < DateTime.UtcNow))
                   && Model.Status != TodoListApp.WebApp.Models.TaskStatus.Completed);
-}
-<div class="mb-2">
-    <span class="badge badge-status @statusClass">@Model.Status</span>
-    @if (overdue)
-    {
-        <span class="ms-2 small fw-semibold" style="color:#b91c1c;">Overdue</span>
-    }
-</div>
 
-<div class="page-title">
-    <h1>@Model.Title</h1>
-</div>
-@if (!string.IsNullOrWhiteSpace(Model.Description))
-{
-    <div class="desc mb-3">@Model.Description</div>
-}
-
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Task Id</dt>
-            <dd class="col-sm-9">@Model.Id</dd>
-
-            <dt class="col-sm-3">List Id</dt>
-            <dd class="col-sm-9">@Model.TodoListId</dd>
-
-            <dt class="col-sm-3">Created</dt>
-            <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
-
-            <dt class="col-sm-3">Due</dt>
-            <dd class="col-sm-9">@((Model.DueDate.HasValue) ? Model.DueDate.Value.ToString("yyyy-MM-dd HH:mm") : "-")</dd>
-
-            <dt class="col-sm-3">Status</dt>
-            <dd class="col-sm-9">@Model.Status</dd>
-
-            <dt class="col-sm-3">Assignee</dt>
-            <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.AssigneeId) ? Model.AssigneeId : "-")</dd>
-
-            @if (Model.IsOverdue.HasValue)
-            {
-                <dt class="col-sm-3">Overdue</dt>
-                <dd class="col-sm-9">@(Model.IsOverdue.Value ? "Yes" : "No")</dd>
-            }
-        </dl>
-    </div>
-</div>
-
-@{
     var taskTags = ViewData["TaskTags"] as IReadOnlyList<TodoListApp.WebApp.Models.TagItem> ?? Array.Empty<TodoListApp.WebApp.Models.TagItem>();
     var allTags = ViewData["AllTags"] as IReadOnlyList<TodoListApp.WebApp.Models.TagItem> ?? Array.Empty<TodoListApp.WebApp.Models.TagItem>();
+    var comments = ViewData["TaskComments"] as IReadOnlyList<TodoListApp.WebApp.Models.CommentItem> ?? Array.Empty<TodoListApp.WebApp.Models.CommentItem>();
 }
 
-<div class="mt-3">
-    <h5>Tags</h5>
-    <div class="d-flex flex-wrap gap-2">
-        @foreach (var t in taskTags)
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="badge badge-status @statusClass">@Model.Status</span>
+            @if (overdue)
+            {
+                <span class="ms-2 small fw-semibold" style="color:#b91c1c;">Overdue</span>
+            }
+        </div>
+
+        <div class="page-title">
+            <h1>@Model.Title</h1>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
         {
-            <form asp-action="RemoveTag" method="post"
-                  class="d-inline-flex align-items-center gap-2"
-                  style="background:@t.ColorHex; border-radius:999px; padding:4px 10px;">
+            <div class="desc mb-3">@Model.Description</div>
+        }
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Task Id</dt>
+                    <dd class="col-sm-9">@Model.Id</dd>
+
+                    <dt class="col-sm-3">List Id</dt>
+                    <dd class="col-sm-9">@Model.TodoListId</dd>
+
+                    <dt class="col-sm-3">Created</dt>
+                    <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
+
+                    <dt class="col-sm-3">Due</dt>
+                    <dd class="col-sm-9">@((Model.DueDate.HasValue) ? Model.DueDate.Value.ToString("yyyy-MM-dd HH:mm") : "-")</dd>
+
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">@Model.Status</dd>
+
+                    <dt class="col-sm-3">Assignee</dt>
+                    <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.AssigneeId) ? Model.AssigneeId : "-")</dd>
+
+                    @if (Model.IsOverdue.HasValue)
+                    {
+                        <dt class="col-sm-3">Overdue</dt>
+                        <dd class="col-sm-9">@(Model.IsOverdue.Value ? "Yes" : "No")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <h5>Tags</h5>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var t in taskTags)
+                {
+                    <form asp-action="RemoveTag" method="post"
+                          class="d-inline-flex align-items-center gap-2"
+                          style="background:@t.ColorHex; border-radius:999px; padding:4px 10px;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="tagId" value="@t.Id" />
+
+                        <span style="font-size:13px;">@t.Name</span>
+
+                        <button type="submit"
+                                style="border:none; background:transparent; font-size:12px; line-height:1; cursor:pointer;">
+                            ✕
+                        </button>
+                    </form>
+                }
+            </div>
+
+            <form asp-action="AddTag" method="post" class="mt-2 d-flex gap-2 align-items-center">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
-                <input type="hidden" name="tagId" value="@t.Id" />
-
-                <span style="font-size:13px;">@t.Name</span>
-
-                <button type="submit"
-                        style="border:none; background:transparent; font-size:12px; line-height:1; cursor:pointer;">
-                    ✕
-                </button>
+                <select name="tagId" class="form-select form-select-sm" style="width:180px;">
+                    @foreach (var t in allTags)
+                    {
+                        <option value="@t.Id">@t.Name</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Add tag</button>
             </form>
+        </div>
 
-        }
+        <div class="mt-3">
+            <a asp-controller="TodoList" asp-action="Index"
+               asp-route-selectedId="@Model.TodoListId"
+               asp-route-selectedTitle=""
+               asp-route-selectedDescription=""
+               class="btn btn-outline-secondary square-btn">Back</a>
+        </div>
     </div>
 
-    <form asp-action="AddTag" method="post" class="mt-2 d-flex gap-2 align-items-center">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.Id" />
-        <select name="tagId" class="form-select form-select-sm" style="width:180px;">
-            @foreach (var t in allTags)
-            {
-                <option value="@t.Id">@t.Name</option>
-            }
-        </select>
-        <button type="submit" class="btn btn-primary btn-sm">Add tag</button>
-    </form>
-</div>
-
-<div class="mt-3">
-    <a asp-controller="TodoList" asp-action="Index"
-       asp-route-selectedId="@Model.TodoListId"
-       asp-route-selectedTitle=""
-       asp-route-selectedDescription=""
-       class="btn btn-outline-secondary square-btn">Back</a>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Comments</h5>
+            </div>
+            <div class="card-body" style="max-height:460px; overflow-y:auto;">
+                @if (comments.Count == 0)
+                {
+                    <div class="text-center text-muted py-4">
+                        No comments yet.
+                    </div>
+                }
+                else
+                {
+                    foreach (var c in comments)
+                    {
+                        <div class="border rounded p-2 mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="me-2">
+                                    <div>@c.Text</div>
+                                    <div class="small text-muted">
+                                        @c.CreatedByUserId · @c.CreatedUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                                        @if (c.UpdatedUtc.HasValue)
+                                        {
+                                            <span>(edited)</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">⋯</button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <button class="dropdown-item" type="button" data-bs-toggle="collapse" data-bs-target="#edit-@c.Id">Edit</button>
+                                        </li>
+                                        <li>
+                                            <form asp-controller="Comment" asp-action="Delete" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="taskId" value="@Model.Id" />
+                                                <input type="hidden" name="commentId" value="@c.Id" />
+                                                <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="collapse mt-2" id="edit-@c.Id">
+                                <form asp-controller="Comment" asp-action="Update" method="post" class="d-flex gap-2">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="taskId" value="@Model.Id" />
+                                    <input type="hidden" name="commentId" value="@c.Id" />
+                                    <input type="text" name="text" value="@c.Text" class="form-control form-control-sm" maxlength="2000" />
+                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="card-footer bg-white">
+                <form asp-controller="Comment" asp-action="Create" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="taskId" value="@Model.Id" />
+                    <input type="text" name="text" class="form-control form-control-sm" placeholder="Write a comment..." maxlength="2000" />
+                    <button type="submit" class="btn btn-primary btn-sm">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
