@@ -32,5 +32,4 @@ public interface ITaskDatabaseService
     DateTime? dueTo,
     int page,
     int pageSize);
-
 }

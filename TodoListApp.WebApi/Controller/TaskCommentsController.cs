@@ -10,14 +10,10 @@ namespace TodoListApp.WebApi.Controller;
 public class TaskCommentsController : ControllerBase
 {
     private readonly ICommentDatabaseService comments;
-    private readonly ILogger<TaskCommentsController> logger;
 
-    public TaskCommentsController(
-        ICommentDatabaseService comments,
-        ILogger<TaskCommentsController> logger)
+    public TaskCommentsController(ICommentDatabaseService comments)
     {
         this.comments = comments;
-        this.logger = logger;
     }
 
     [HttpGet]
@@ -49,7 +45,7 @@ public class TaskCommentsController : ControllerBase
         try
         {
             var created = await this.comments.CreateAsync(taskId, this.CurrentUserId(), model);
-            return this.CreatedAtAction(nameof(GetAll), new { taskId = taskId }, created);
+            return this.CreatedAtAction(nameof(this.GetAll), new { taskId = taskId }, created);
         }
         catch (KeyNotFoundException)
         {

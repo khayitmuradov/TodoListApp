@@ -8,14 +8,7 @@ namespace TodoListApp.WebApi.Controller;
 [Route("api/tags")]
 public class TagController : ControllerBase
 {
-    private static readonly Action<ILogger, string, Exception?> LogBadCreateRequest =
-        LoggerMessage.Define<string>(
-            LogLevel.Warning,
-            new EventId(1001, nameof(LogBadCreateRequest)),
-            "Bad create request: {ErrorMessage}");
-
     private readonly ITagDatabaseService tags;
-    private readonly ILogger<TagController>? logger;
 
     public TagController(ITagDatabaseService tags) => this.tags = tags;
 
@@ -44,9 +37,8 @@ public class TagController : ControllerBase
         {
             await this.tags.DeleteAsync(tagId);
         }
-        catch (KeyNotFoundException ex)
+        catch (KeyNotFoundException)
         {
-            this.logger.LogWarning(ex, "Delete tag not found");
             return this.NotFound();
         }
 
@@ -65,9 +57,8 @@ public class TagController : ControllerBase
         {
             _ = this.Ok(await this.tags.GetTasksByTagAsync(tagId));
         }
-        catch (KeyNotFoundException ex)
+        catch (KeyNotFoundException)
         {
-            this.logger.LogWarning(ex, "Tasks by tag not found");
             return this.NotFound();
         }
 

@@ -8,7 +8,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <AnalysisLevel>latest</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
-    <NoWarn>CA1515</NoWarn>
+    <NoWarn>CA1515, IDE0079</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -17,6 +17,10 @@ public class TodoListController : Controller
         this.tags = tags;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Major Code Smell",
+    "S107:Methods should not have too many parameters",
+    Justification = "This controller method needs multiple query parameters for page and filter control.")]
     public async Task<IActionResult> Index(
         int page = 1,
         int pageSize = 5,

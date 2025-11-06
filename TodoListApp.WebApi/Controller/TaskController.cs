@@ -11,24 +11,15 @@ namespace TodoListApp.WebApi.Controller;
 [Route("api")]
 public partial class TaskController : ControllerBase
 {
-    private static readonly Action<ILogger, string, Exception?> LogBadCreateRequest =
-        LoggerMessage.Define<string>(
-            LogLevel.Warning,
-            new EventId(1001, nameof(LogBadCreateRequest)),
-            "Bad create request: {ErrorMessage}");
-
     private readonly ITaskDatabaseService service;
     private readonly IConfiguration configuration;
-    private readonly ILogger<TaskController> logger;
 
     public TaskController(
         ITaskDatabaseService service,
-        IConfiguration configuration,
-        ILogger<TaskController> logger)
+        IConfiguration configuration)
     {
         this.service = service;
         this.configuration = configuration;
-        this.logger = logger;
     }
 
     [HttpGet("lists/{listId:int}/tasks")]
@@ -83,7 +74,6 @@ public partial class TaskController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            LogBadCreateRequest(this.logger, ex.Message, ex);
             return this.BadRequest(new { error = ex.Message });
         }
         catch (KeyNotFoundException)
@@ -178,9 +168,8 @@ public partial class TaskController : ControllerBase
             this.Response.Headers["X-Total-Count"] = total.ToString(CultureInfo.InvariantCulture);
             return this.Ok(items);
         }
-        catch (AppException ex)
+        catch (AppException)
         {
-            this.logger.LogError(ex, "Failed to get tasks assigned to current user");
             return this.StatusCode(500, "Internal Server Error");
         }
     }
@@ -191,6 +180,11 @@ public partial class TaskController : ControllerBase
     [HttpPatch("tasks/{id:int}/status")]
     public async Task<IActionResult> ChangeStatusAsync(int id, [FromBody] ChangeTaskStatusModel model)
     {
+        if (model is null)
+        {
+            return this.BadRequest("Request body cannot be null.");
+        }
+
         if (!this.ModelState.IsValid)
         {
             return this.BadRequest(this.ModelState);
@@ -291,9 +285,8 @@ public partial class TaskController : ControllerBase
         {
             return this.Ok(await tags.GetTagsForTaskAsync(id));
         }
-        catch (KeyNotFoundException ex)
+        catch (KeyNotFoundException)
         {
-            this.logger.LogWarning(ex, "Task not found");
             return this.NotFound();
         }
     }
@@ -313,9 +306,8 @@ public partial class TaskController : ControllerBase
             await tags.AddTagToTaskAsync(id, tagId);
             return this.NoContent();
         }
-        catch (KeyNotFoundException ex)
+        catch (KeyNotFoundException)
         {
-            this.logger.LogWarning(ex, "Task/tag not found");
             return this.NotFound();
         }
     }
@@ -335,9 +327,8 @@ public partial class TaskController : ControllerBase
             await tags.RemoveTagFromTaskAsync(id, tagId);
             return this.NoContent();
         }
-        catch (KeyNotFoundException ex)
+        catch (KeyNotFoundException)
         {
-            this.logger.LogWarning(ex, "Task/tag/link not found");
             return this.NotFound();
         }
     }

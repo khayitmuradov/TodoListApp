@@ -16,17 +16,8 @@ internal class TagDatabaseService : ITagDatabaseService
 
     public async Task<TagModel> CreateAsync(CreateTagModel model)
     {
-        var name = (model.Name ?? string.Empty).Trim();
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException(nameof(model.Name));
-        }
-
-        var color = TagColor.FromName(name); // Option A
-        var e = new TagEntity { Name = name, ColorHex = color };
-        _ = this.db.Tags.Add(e);
-        _ = await this.db.SaveChangesAsync();
-        return new TagModel { Id = e.Id, Name = e.Name, ColorHex = e.ColorHex };
+        var name = ValidateCreateTagModel(model);
+        return await this.CreateTagInternalAsync(name);
     }
 
     public async Task DeleteAsync(int tagId)
@@ -128,5 +119,34 @@ internal class TagDatabaseService : ITagDatabaseService
                            .OrderBy(x => x.Name)
                            .ToList(),
         }).ToList();
+    }
+
+    private static string ValidateCreateTagModel(CreateTagModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        var name = (model.Name ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Tag name is required");
+        }
+
+        return name;
+    }
+
+    private async Task<TagModel> CreateTagInternalAsync(string name)
+    {
+        var color = TagColor.FromName(name);
+        var e = new TagEntity { Name = name, ColorHex = color };
+
+        _ = this.db.Tags.Add(e);
+        _ = await this.db.SaveChangesAsync();
+
+        return new TagModel
+        {
+            Id = e.Id,
+            Name = e.Name,
+            ColorHex = e.ColorHex,
+        };
     }
 }

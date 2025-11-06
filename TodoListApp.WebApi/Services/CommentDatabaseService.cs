@@ -8,14 +8,10 @@ namespace TodoListApp.WebApi.Services;
 internal class CommentDatabaseService : ICommentDatabaseService
 {
     private readonly TodoListDbContext db;
-    private readonly ILogger<CommentDatabaseService> logger;
 
-    public CommentDatabaseService(
-        TodoListDbContext db,
-        ILogger<CommentDatabaseService> logger)
+    public CommentDatabaseService(TodoListDbContext db)
     {
         this.db = db;
-        this.logger = logger;
     }
 
     public async Task<IReadOnlyList<CommentModel>> GetByTaskAsync(int taskId, string requesterId)
@@ -50,8 +46,6 @@ internal class CommentDatabaseService : ICommentDatabaseService
 
         _ = this.db.TaskComments.Add(entity);
         _ = await this.db.SaveChangesAsync();
-
-        this.logger.LogInformation("Comment {CommentId} created on task {TaskId} by {User}", entity.Id, taskId, requesterId);
 
         return ToModel(entity);
     }

@@ -60,23 +60,21 @@ public class TaskController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(int listId, CreateTaskRequest model)
     {
-        ArgumentNullException.ThrowIfNull(model);
-
-        if (string.IsNullOrWhiteSpace(model.Title))
+        var validationResult = this.ValidateCreateTaskRequest(listId, model);
+        if (validationResult != null)
         {
-            this.ModelState.AddModelError(nameof(model.Title), "Title is required.");
-        }
-
-        if (!this.ModelState.IsValid)
-        {
-            this.ViewData["ListId"] = listId;
-            return this.View(model);
+            return validationResult;
         }
 
         _ = await this.tasks.CreateAsync(listId, model);
         this.TempData["Message"] = "Task created.";
 
-        return this.RedirectToAction("Index", "TodoList", new { selectedId = listId, taskPage = 1, taskPageSize = 5 });
+        return this.RedirectToAction("Index", "TodoList", new
+        {
+            selectedId = listId,
+            taskPage = 1,
+            taskPageSize = 5,
+        });
     }
 
     [HttpGet]
@@ -191,5 +189,23 @@ public class TaskController : Controller
             aPage,
             aPageSize,
         });
+    }
+
+    private ViewResult? ValidateCreateTaskRequest(int listId, CreateTaskRequest model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            this.ModelState.AddModelError(nameof(model.Title), "Title is required.");
+        }
+
+        if (!this.ModelState.IsValid)
+        {
+            this.ViewData["ListId"] = listId;
+            return this.View(model);
+        }
+
+        return null;
     }
 }

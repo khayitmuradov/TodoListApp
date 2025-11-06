@@ -42,19 +42,21 @@ public class TodoListController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TodoListModel>> Create([FromBody] CreateTodoListModel model)
     {
-        ArgumentNullException.ThrowIfNull(model);
+        var validationResult = this.ValidateCreateModel(model);
 
-        if (!this.ModelState.IsValid)
+        if (validationResult != null)
         {
-            return this.BadRequest(this.ModelState);
+            return validationResult;
         }
 
-        var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
-        if (model.Title == null)
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (string.IsNullOrWhiteSpace(model.Title))
         {
             return this.BadRequest("Title is required.");
         }
 
+        var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
         var created = await this.service.CreateAsync(userId, model.Title, model.Description);
 
         return this.CreatedAtAction(nameof(this.GetMine), new { id = created.Id }, new TodoListModel
@@ -68,22 +70,22 @@ public class TodoListController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateTodoListModel model)
     {
-        ArgumentNullException.ThrowIfNull(model);
-
-        if (!this.ModelState.IsValid)
+        var validationResult = this.ValidateUpdateModel(model);
+        if (validationResult is not null)
         {
-            return this.BadRequest(this.ModelState);
+            return validationResult;
         }
 
-        if (model.Title == null)
-        {
-            return this.BadRequest("Title is required.");
-        }
+        return await this.UpdateTodoListAsync(id, model);
+    }
 
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
         try
         {
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
-            await this.service.UpdateAsync(userId, id, model.Title, model.Description);
+            await this.service.DeleteAsync(userId, id);
             return this.NoContent();
         }
         catch (KeyNotFoundException)
@@ -96,13 +98,49 @@ public class TodoListController : ControllerBase
         }
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    private BadRequestObjectResult? ValidateUpdateModel(UpdateTodoListModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (!this.ModelState.IsValid)
+        {
+            return this.BadRequest(this.ModelState);
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            return this.BadRequest("Title is required.");
+        }
+
+        return null;
+    }
+
+    private ActionResult<TodoListModel>? ValidateCreateModel(CreateTodoListModel model)
+    {
+        if (model == null)
+        {
+            return this.BadRequest("Model cannot be null.");
+        }
+
+        if (!this.ModelState.IsValid)
+        {
+            return this.BadRequest(this.ModelState);
+        }
+
+        if (model.Title == null)
+        {
+            return this.BadRequest("Title is required.");
+        }
+
+        return null;
+    }
+
+    private async Task<IActionResult> UpdateTodoListAsync(int id, UpdateTodoListModel model)
     {
         try
         {
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
-            await this.service.DeleteAsync(userId, id);
+            await this.service.UpdateAsync(userId, id, model.Title!, model.Description);
             return this.NoContent();
         }
         catch (KeyNotFoundException)

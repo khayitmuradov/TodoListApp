@@ -7,19 +7,11 @@ namespace TodoListApp.WebApi.Services;
 
 internal partial class TodoListDatabaseService : ITodoListDatabaseService
 {
-    private static readonly Action<ILogger, int, string, Exception?> LogTodoListCreated =
-        LoggerMessage.Define<int, string>(
-            LogLevel.Information,
-            new EventId(1, nameof(LogTodoListCreated)),
-            "TodoList created {TodoListId} by {OwnerId}");
-
     private readonly TodoListDbContext dbContext;
-    private readonly ILogger<TodoListDatabaseService> logger;
 
-    public TodoListDatabaseService(TodoListDbContext dbContext, ILogger<TodoListDatabaseService> logger)
+    public TodoListDatabaseService(TodoListDbContext dbContext)
     {
         this.dbContext = dbContext;
-        this.logger = logger;
     }
 
     public async Task<TodoList> CreateAsync(string ownerId, string title, string? description)
@@ -33,7 +25,6 @@ internal partial class TodoListDatabaseService : ITodoListDatabaseService
 
         _ = this.dbContext.Add(e);
         _ = await this.dbContext.SaveChangesAsync();
-        LogTodoListCreated(this.logger, e.Id, ownerId, null);
 
         return new TodoList
         {

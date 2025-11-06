@@ -8,12 +8,10 @@ namespace TodoListApp.WebApi.Services;
 internal class TaskDatabaseService : ITaskDatabaseService
 {
     private readonly TodoListDbContext dbContext;
-    private readonly ILogger<TaskDatabaseService> logger;
 
-    public TaskDatabaseService(TodoListDbContext dbContext, ILogger<TaskDatabaseService> logger)
+    public TaskDatabaseService(TodoListDbContext dbContext)
     {
         this.dbContext = dbContext;
-        this.logger = logger;
     }
 
     public async Task<(IReadOnlyList<TaskModel> Items, int Total)> GetByListAsync(int listId, string requesterId, int page, int pageSize)
@@ -60,7 +58,6 @@ internal class TaskDatabaseService : ITaskDatabaseService
 
         _ = this.dbContext.Add(e);
         _ = await this.dbContext.SaveChangesAsync();
-        this.logger.LogInformation("Task {TaskId} created in list {ListId} by {User}", e.Id, listId, creatorUserId);
 
         return ToModel(e);
     }
@@ -163,8 +160,6 @@ internal class TaskDatabaseService : ITaskDatabaseService
 
         e.Status = newStatus;
         _ = await this.dbContext.SaveChangesAsync();
-
-        this.logger.LogInformation("Task {TaskId} status changed to {Status} by {User}", taskId, newStatus, requesterId);
     }
 
     public async Task<(IReadOnlyList<TaskModel> Items, int Total)> SearchAsync(
