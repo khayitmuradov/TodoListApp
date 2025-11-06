@@ -100,24 +100,13 @@ public class TaskController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, UpdateTaskRequest model, int listId)
     {
-        ArgumentNullException.ThrowIfNull(model);
-
-        if (string.IsNullOrWhiteSpace(model.Title))
+        var validationResult = this.ValidateEdit(id, model, listId);
+        if (validationResult is not null)
         {
-            this.ModelState.AddModelError(nameof(model.Title), "Title is required.");
+            return validationResult;
         }
 
-        if (!this.ModelState.IsValid)
-        {
-            this.ViewData["TaskId"] = id;
-            this.ViewData["ListId"] = listId;
-            return this.View(model);
-        }
-
-        await this.tasks.UpdateAsync(id, model);
-        this.TempData["Message"] = "Task updated.";
-
-        return this.RedirectToAction("Index", "TodoList", new { selectedId = listId });
+        return await this.EditCoreAsync(id, model, listId);
     }
 
     [HttpGet]
@@ -155,6 +144,10 @@ public class TaskController : Controller
         return this.RedirectToAction("Index", "TodoList", new { selectedId = listId });
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Major Code Smell",
+    "S107:Methods should not have too many parameters",
+    Justification = "This controller method needs multiple query parameters for page and filter control.")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeStatusAssigned(
@@ -207,5 +200,31 @@ public class TaskController : Controller
         }
 
         return null;
+    }
+
+    private ViewResult? ValidateEdit(int id, UpdateTaskRequest model, int listId)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            this.ModelState.AddModelError(nameof(model.Title), "Title is required.");
+        }
+
+        if (!this.ModelState.IsValid)
+        {
+            this.ViewData["TaskId"] = id;
+            this.ViewData["ListId"] = listId;
+            return this.View(model);
+        }
+
+        return null;
+    }
+
+    private async Task<IActionResult> EditCoreAsync(int id, UpdateTaskRequest model, int listId)
+    {
+        await this.tasks.UpdateAsync(id, model);
+        this.TempData["Message"] = "Task updated.";
+        return this.RedirectToAction("Index", "TodoList", new { selectedId = listId });
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using TodoListApp.WebApp.Models;
 using TodoListApp.WebApp.Services;
 
@@ -75,59 +76,41 @@ public class TodoListController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create() => this.View(new TodoList());
+    public IActionResult Create() => this.View(new TodoListModel());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(TodoList model)
+    public async Task<IActionResult> Create(TodoListModel model)
     {
-        ArgumentNullException.ThrowIfNull(model);
-
-        if (!this.ModelState.IsValid)
+        var validationResult = this.ValidateCreate(model);
+        if (validationResult is not null)
         {
-            return this.View(model);
+            return validationResult;
         }
 
-        if (string.IsNullOrWhiteSpace(model.Title))
-        {
-            this.ModelState.AddModelError(nameof(model.Title), "Title is required.");
-            return this.View(model);
-        }
-
-        _ = await this.lists.CreateAsync(model.Title!, model.Description);
-        this.TempData["Message"] = "List created.";
-        return this.RedirectToAction(nameof(this.Index));
+        return await this.CreateAsyncCore(model);
     }
 
     [HttpGet]
     public IActionResult Edit(int id, string? title, string? description)
-        => this.View(new TodoList { Id = id, Title = title, Description = description });
+        => this.View(new TodoListModel { Id = id, Title = title, Description = description });
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(TodoList model)
+    public async Task<IActionResult> Edit(TodoListModel model)
     {
-        ArgumentNullException.ThrowIfNull(model);
-
-        if (!this.ModelState.IsValid)
+        var error = ValidateEdit(model, this.ModelState);
+        if (error is not null)
         {
-            return this.View(model);
+            return error;
         }
 
-        if (string.IsNullOrWhiteSpace(model.Title))
-        {
-            this.ModelState.AddModelError(nameof(model.Title), "Title is required.");
-            return this.View(model);
-        }
-
-        await this.lists.UpdateAsync(model.Id, model.Title!, model.Description);
-        this.TempData["Message"] = "List updated.";
-        return this.RedirectToAction(nameof(this.Index));
+        return await this.EditCoreAsync(model);
     }
 
     [HttpGet]
     public IActionResult Delete(int id, string? title)
-        => this.View(new TodoList { Id = id, Title = title });
+        => this.View(new TodoListModel { Id = id, Title = title });
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -135,6 +118,68 @@ public class TodoListController : Controller
     {
         await this.lists.DeleteAsync(id);
         this.TempData["Message"] = "List deleted.";
+        return this.RedirectToAction(nameof(this.Index));
+    }
+
+    private static ViewResult? ValidateEdit(TodoListModel model, ModelStateDictionary modelState)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (!modelState.IsValid)
+        {
+            return new ViewResult
+            {
+                ViewName = "Edit",
+                ViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary<TodoListModel>(
+                new EmptyModelMetadataProvider(), modelState)
+                { Model = model },
+            };
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            modelState.AddModelError(nameof(model.Title), "Title is required.");
+            return new ViewResult
+            {
+                ViewName = "Edit",
+                ViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary<TodoListModel>(
+                new EmptyModelMetadataProvider(), modelState)
+                { Model = model },
+            };
+        }
+
+        return null;
+    }
+
+    private ViewResult? ValidateCreate(TodoListModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (!this.ModelState.IsValid)
+        {
+            return this.View(model);
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            this.ModelState.AddModelError(nameof(model.Title), "Title is required.");
+            return this.View(model);
+        }
+
+        return null;
+    }
+
+    private async Task<IActionResult> EditCoreAsync(TodoListModel model)
+    {
+        await this.lists.UpdateAsync(model.Id, model.Title!, model.Description);
+        this.TempData["Message"] = "List updated.";
+        return this.RedirectToAction(nameof(this.Index));
+    }
+
+    private async Task<IActionResult> CreateAsyncCore(TodoListModel model)
+    {
+        _ = await this.lists.CreateAsync(model.Title!, model.Description);
+        this.TempData["Message"] = "List created.";
         return this.RedirectToAction(nameof(this.Index));
     }
 }

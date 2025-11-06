@@ -1,4 +1,4 @@
-@model IReadOnlyList<TodoListApp.WebApp.Models.TodoList>
+@model IReadOnlyList<TodoListApp.WebApp.Models.TodoListModel>
 @using TodoListApp.WebApp.Models
 
 @{
@@ -40,11 +40,6 @@
 }
 
 @{
-    var selectedListTasks = ViewData["SelectedListTasks"] as IReadOnlyList<TodoListApp.WebApp.Models.TaskItem>
-                            ?? Array.Empty<TodoListApp.WebApp.Models.TaskItem>();
-    var selectedListTitle = ViewData["SelectedListTitle"] as string ?? "Select a list from the left to see its details.";
-    var assignedTasks = ViewData["AssignedTasks"] as IReadOnlyList<TodoListApp.WebApp.Models.TaskItem>
-                        ?? Array.Empty<TodoListApp.WebApp.Models.TaskItem>();
     var tags = ViewData["Tags"] as IReadOnlyList<TodoListApp.WebApp.Models.TagItem> ?? Array.Empty<TodoListApp.WebApp.Models.TagItem>();
     var selectedTagId = ViewData["SelectedTagId"] as int?;
     var tagTasks = ViewData["TagTasks"] as IReadOnlyList<TodoListApp.WebApp.Models.TaskItem>;
@@ -125,7 +120,7 @@
 
     <div class="row-sep"></div>
 
-    <nav class="pager d-flex justify-content-between">
+    <nav class="aria-label pager d-flex justify-content-between">
         <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrevLists ? "" : "disabled")"
            asp-action="Index"
            asp-route-page="@(page-1)"
@@ -214,7 +209,7 @@
         var hasPrev = aPage > 1;
         var hasNext = aPage < aPages;
     }
-    <nav class="pager d-flex justify-content-between mt-2">
+    <nav class="aria-label pager d-flex justify-content-between mt-2">
         <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrev ? "" : "disabled")"
            asp-action="Index"
            asp-route-page="@pageCur"
@@ -340,7 +335,7 @@
 
             </div>
 
-            <nav class="pager d-flex justify-content-between mt-3">
+            <nav class="pager d-flex justify-content-between mt-3 aria-label">
                 <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrevTasks ? "" : "disabled")"
                    asp-action="Index"
                    asp-route-page="@(page)"

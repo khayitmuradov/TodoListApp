@@ -274,6 +274,41 @@ public partial class TaskController : ControllerBase
     [HttpGet("tasks/{id:int}/tags")]
     public async Task<ActionResult<IReadOnlyList<TagModel>>> GetTagsForTask(int id, [FromServices] ITagDatabaseService tags)
     {
+        var validationResult = this.ValidateGetTagsForTask(id, tags);
+        if (validationResult is not null)
+        {
+            return validationResult;
+        }
+
+        return await this.GetTagsForTaskCoreAsync(id, tags);
+    }
+
+    [HttpPost("tasks/{id:int}/tags/{tagId:int}")]
+    public async Task<IActionResult> AddTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
+    {
+        var validationResult = this.ValidateAddTag(id, tagId, tags);
+        if (validationResult is not null)
+        {
+            return validationResult;
+        }
+
+        return await this.AddTagCoreAsync(id, tagId, tags);
+    }
+
+    [HttpDelete("tasks/{id:int}/tags/{tagId:int}")]
+    public async Task<IActionResult> RemoveTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
+    {
+        var validation = this.ValidateRemoveTag(id, tagId, tags);
+        if (validation is not null)
+        {
+            return validation;
+        }
+
+        return await this.RemoveTagCoreAsync(id, tagId, tags);
+    }
+
+    private ActionResult<IReadOnlyList<TagModel>>? ValidateGetTagsForTask(int id, ITagDatabaseService tags)
+    {
         ArgumentNullException.ThrowIfNull(tags);
 
         if (id <= 0)
@@ -281,9 +316,15 @@ public partial class TaskController : ControllerBase
             return this.BadRequest("Invalid task id");
         }
 
+        return null;
+    }
+
+    private async Task<ActionResult<IReadOnlyList<TagModel>>> GetTagsForTaskCoreAsync(int id, ITagDatabaseService tags)
+    {
         try
         {
-            return this.Ok(await tags.GetTagsForTaskAsync(id));
+            var result = await tags.GetTagsForTaskAsync(id);
+            return this.Ok(result);
         }
         catch (KeyNotFoundException)
         {
@@ -291,8 +332,7 @@ public partial class TaskController : ControllerBase
         }
     }
 
-    [HttpPost("tasks/{id:int}/tags/{tagId:int}")]
-    public async Task<IActionResult> AddTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
+    private BadRequestObjectResult? ValidateRemoveTag(int id, int tagId, ITagDatabaseService tags)
     {
         ArgumentNullException.ThrowIfNull(tags);
 
@@ -301,27 +341,11 @@ public partial class TaskController : ControllerBase
             return this.BadRequest("Invalid id.");
         }
 
-        try
-        {
-            await tags.AddTagToTaskAsync(id, tagId);
-            return this.NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return this.NotFound();
-        }
+        return null;
     }
 
-    [HttpDelete("tasks/{id:int}/tags/{tagId:int}")]
-    public async Task<IActionResult> RemoveTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
+    private async Task<IActionResult> RemoveTagCoreAsync(int id, int tagId, ITagDatabaseService tags)
     {
-        ArgumentNullException.ThrowIfNull(tags);
-
-        if (id <= 0 || tagId <= 0)
-        {
-            return this.BadRequest("Invalid id.");
-        }
-
         try
         {
             await tags.RemoveTagFromTaskAsync(id, tagId);
@@ -347,5 +371,30 @@ public partial class TaskController : ControllerBase
     private string CurrentUserId()
     {
         return this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
+    }
+
+    private BadRequestObjectResult? ValidateAddTag(int id, int tagId, ITagDatabaseService tags)
+    {
+        ArgumentNullException.ThrowIfNull(tags);
+
+        if (id <= 0 || tagId <= 0)
+        {
+            return this.BadRequest("Invalid id.");
+        }
+
+        return null;
+    }
+
+    private async Task<IActionResult> AddTagCoreAsync(int id, int tagId, ITagDatabaseService tags)
+    {
+        try
+        {
+            await tags.AddTagToTaskAsync(id, tagId);
+            return this.NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return this.NotFound();
+        }
     }
 }

@@ -164,7 +164,7 @@ internal class TaskWebApiService : ITaskWebApiService
         _ = resp.EnsureSuccessStatusCode();
 
         var json = await resp.Content.ReadAsStringAsync(ct);
-        var items = JsonSerializer.Deserialize<List<TaskItem>>(json, this.jsonOptions) ?? new();
+        var items = JsonSerializer.Deserialize<List<TaskItem>>(json, this.jsonOptions) ?? new List<TaskItem>();
 
         var totalHeader = resp.Headers.TryGetValues("X-Total-Count", out var vals) ? vals.FirstOrDefault() : null;
         _ = int.TryParse(totalHeader, out var total);

@@ -42,29 +42,13 @@ public class TodoListController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TodoListModel>> Create([FromBody] CreateTodoListModel model)
     {
-        var validationResult = this.ValidateCreateModel(model);
-
+        var validationResult = this.ValidateCreateRequest(model);
         if (validationResult != null)
         {
             return validationResult;
         }
 
-        ArgumentNullException.ThrowIfNull(model);
-
-        if (string.IsNullOrWhiteSpace(model.Title))
-        {
-            return this.BadRequest("Title is required.");
-        }
-
-        var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
-        var created = await this.service.CreateAsync(userId, model.Title, model.Description);
-
-        return this.CreatedAtAction(nameof(this.GetMine), new { id = created.Id }, new TodoListModel
-        {
-            Id = created.Id,
-            Title = created.Title,
-            Description = created.Description,
-        });
+        return await this.CreateTodoListAsync(model);
     }
 
     [HttpPut("{id:int}")]
@@ -115,26 +99,6 @@ public class TodoListController : ControllerBase
         return null;
     }
 
-    private ActionResult<TodoListModel>? ValidateCreateModel(CreateTodoListModel model)
-    {
-        if (model == null)
-        {
-            return this.BadRequest("Model cannot be null.");
-        }
-
-        if (!this.ModelState.IsValid)
-        {
-            return this.BadRequest(this.ModelState);
-        }
-
-        if (model.Title == null)
-        {
-            return this.BadRequest("Title is required.");
-        }
-
-        return null;
-    }
-
     private async Task<IActionResult> UpdateTodoListAsync(int id, UpdateTodoListModel model)
     {
         try
@@ -151,5 +115,30 @@ public class TodoListController : ControllerBase
         {
             return this.Forbid();
         }
+    }
+
+    private ActionResult<TodoListModel>? ValidateCreateRequest(CreateTodoListModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            return this.BadRequest("Title is required.");
+        }
+
+        return null;
+    }
+
+    private async Task<ActionResult<TodoListModel>> CreateTodoListAsync(CreateTodoListModel model)
+    {
+        var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
+        var created = await this.service.CreateAsync(userId, model.Title!, model.Description);
+
+        return this.CreatedAtAction(nameof(this.GetMine), new { id = created.Id }, new TodoListModel
+        {
+            Id = created.Id,
+            Title = created.Title,
+            Description = created.Description,
+        });
     }
 }

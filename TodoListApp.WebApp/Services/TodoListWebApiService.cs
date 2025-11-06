@@ -23,7 +23,7 @@ internal class TodoListWebApiService : ITodoListWebApiService
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
-    public async Task<(IReadOnlyList<TodoList> Items, int Total)> GetAsync(int page, int pageSize, CancellationToken ct = default)
+    public async Task<(IReadOnlyList<TodoListModel> Items, int Total)> GetAsync(int page, int pageSize, CancellationToken ct = default)
     {
         var uri = new Uri(this.httpClient.BaseAddress!, $"api/lists?page={page}&pageSize={pageSize}");
         var resp = await this.httpClient.GetAsync(uri, ct);
@@ -34,11 +34,11 @@ internal class TodoListWebApiService : ITodoListWebApiService
         var totalHeader = resp.Headers.TryGetValues("X-Total-Count", out var vals) ? vals.FirstOrDefault() : null;
         _ = int.TryParse(totalHeader, out var total);
 
-        var items = apiItems.Select(x => new TodoList { Id = x.Id, Title = x.Title, Description = x.Description }).ToList();
+        var items = apiItems.Select(x => new TodoListModel { Id = x.Id, Title = x.Title, Description = x.Description }).ToList();
         return (items, total);
     }
 
-    public async Task<TodoList> CreateAsync(string title, string? description, CancellationToken ct = default)
+    public async Task<TodoListModel> CreateAsync(string title, string? description, CancellationToken ct = default)
     {
         var uri = new Uri(this.httpClient.BaseAddress!, "api/lists");
         var payload = new CreateTodoListWebApiModel { Title = title, Description = description };
@@ -49,7 +49,7 @@ internal class TodoListWebApiService : ITodoListWebApiService
 
         var json = await resp.Content.ReadAsStringAsync(ct);
         var created = JsonSerializer.Deserialize<TodoListWebApiModel>(json, this.jsonOptions) ?? throw new JsonException("TodoList deserialization returned null");
-        return new TodoList { Id = created.Id, Title = created.Title, Description = created.Description };
+        return new TodoListModel { Id = created.Id, Title = created.Title, Description = created.Description };
     }
 
     public async Task UpdateAsync(int id, string title, string? description, CancellationToken ct = default)
