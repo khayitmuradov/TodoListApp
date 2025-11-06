@@ -286,7 +286,7 @@ public partial class TaskController : ControllerBase
     [HttpPost("tasks/{id:int}/tags/{tagId:int}")]
     public async Task<IActionResult> AddTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
     {
-        var validationResult = this.ValidateAddTag(id, tagId, tags);
+        var validationResult = this.ValidateTagOperation(id, tagId, tags);
         if (validationResult is not null)
         {
             return validationResult;
@@ -298,7 +298,7 @@ public partial class TaskController : ControllerBase
     [HttpDelete("tasks/{id:int}/tags/{tagId:int}")]
     public async Task<IActionResult> RemoveTag(int id, int tagId, [FromServices] ITagDatabaseService tags)
     {
-        var validation = this.ValidateRemoveTag(id, tagId, tags);
+        var validation = this.ValidateTagOperation(id, tagId, tags);
         if (validation is not null)
         {
             return validation;
@@ -332,7 +332,7 @@ public partial class TaskController : ControllerBase
         }
     }
 
-    private BadRequestObjectResult? ValidateRemoveTag(int id, int tagId, ITagDatabaseService tags)
+    private BadRequestObjectResult? ValidateTagOperation(int id, int tagId, ITagDatabaseService tags)
     {
         ArgumentNullException.ThrowIfNull(tags);
 
@@ -371,18 +371,6 @@ public partial class TaskController : ControllerBase
     private string CurrentUserId()
     {
         return this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "dev-user";
-    }
-
-    private BadRequestObjectResult? ValidateAddTag(int id, int tagId, ITagDatabaseService tags)
-    {
-        ArgumentNullException.ThrowIfNull(tags);
-
-        if (id <= 0 || tagId <= 0)
-        {
-            return this.BadRequest("Invalid id.");
-        }
-
-        return null;
     }
 
     private async Task<IActionResult> AddTagCoreAsync(int id, int tagId, ITagDatabaseService tags)

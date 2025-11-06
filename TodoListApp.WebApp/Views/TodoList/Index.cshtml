@@ -120,7 +120,7 @@
 
     <div class="row-sep"></div>
 
-    <nav class="aria-label pager d-flex justify-content-between">
+    <nav class="pager d-flex justify-content-between" aria-label="Main pagination">
         <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrevLists ? "" : "disabled")"
            asp-action="Index"
            asp-route-page="@(page-1)"
@@ -209,7 +209,7 @@
         var hasPrev = aPage > 1;
         var hasNext = aPage < aPages;
     }
-    <nav class="aria-label pager d-flex justify-content-between mt-2">
+    <nav class="pager d-flex justify-content-between mt-2" aria-label="Task list pagination">
         <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrev ? "" : "disabled")"
            asp-action="Index"
            asp-route-page="@pageCur"
@@ -335,7 +335,7 @@
 
             </div>
 
-            <nav class="pager d-flex justify-content-between mt-3 aria-label">
+            <nav class="pager d-flex justify-content-between mt-3" aria-label="Comments pagination">
                 <a class="btn btn-outline-secondary btn-sm square-btn @(hasPrevTasks ? "" : "disabled")"
                    asp-action="Index"
                    asp-route-page="@(page)"
