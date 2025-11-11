@@ -32,8 +32,3 @@
 | EP07 | US28       | Sign out                                                                        | 7        |               |
 | EP07 | US29       | Restore password                                                                | 8        |               |
 | EP08 | US30       | Application menu                                                                | 4        |   Completed   |
-
-
-## Project Evaluation
-
-The project is evaluated using both technical evaluation criteria and an assessment of the scope and quality of the implementation of user stories. Both technical evaluation criteria and criteria for user stories are described in [Project Evaluation](project-evaluation.md) document.
