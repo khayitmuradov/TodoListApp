@@ -1,25 +1,5 @@
 # To-do List Application
 
-In this project, you must design and develop a web application according to the requirements that are specified in the task description.
-  * The application you have to develop must contain two web components - a web and a web API applications.
-  * The web application is a [ASP.NET Core MVC application](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview).
-  * The web API application is a [controller-based ASP.NET Core Web API application](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/apis).
-  * The data store must be a relational database management system such as SQL Server Express.
-  * To access application data the application must use [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/).
-  * The application must use the [ASP.NET Core Identity API](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity) to manage users, passwords and profile data.
-
-
-## Backlog
-
-The application functional requirements are described in the [Functional Requirements](functional-requirements.md) document.
-
-The [backlog with the user stories](https://en.wikipedia.org/wiki/Product_backlog) you need to implement is given in the table below. The full list of user stories with descriptions is in the [User Stories](user-stories.md) document.
-
-Here are some hints for you:
-* Follow the priority order. Start working on user stories in the order listed in the "Priority" column.
-* Mark stories as completed in the [README.md](README.md) file. Once you've finished developing a user story, mark it as completed in the "Is completed?" column (use the "+" or any other text). This mark will help the mentor who will review your project understand which functionality is implemented and which is not.
-* Focus on quality. Implement as many user stories as possible, but if you see that you do not have enough time to complete lower-priority user stories, polish the user stories you have already completed.
-
 | Epic | User Story | Description                                                                     | Priority | Is completed? |
 |------|------------|---------------------------------------------------------------------------------|----------|---------------|
 | EP01 | US01       | View the list of my to-do lists.                                                | 1        |   Completed   |
@@ -52,21 +32,6 @@ Here are some hints for you:
 | EP07 | US28       | Sign out                                                                        | 7        |               |
 | EP07 | US29       | Restore password                                                                | 8        |               |
 | EP08 | US30       | Application menu                                                                | 4        |   Completed   |
-
-
-## Software Architecture
-
-The architecture of the application is described in the [Software Architecture](software-architecture.md) document.
-
-
-## Solution Requirements
-
-The requirements for the application are described in the [Solution Requirements](solution-requirements.md) document.
-
-
-## Delivery Plan
-
-The [delivery plan](delivery-plan.md) contains the list of technical tasks distributed over the weeks these tasks must be delivered.
 
 
 ## Project Evaluation
